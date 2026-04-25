@@ -1,0 +1,177 @@
+/* 1. RESET & VARIABLES */
+:root {
+    --bg-dark: #313338;
+    --bg-card: #2B2D31;
+    --text-main: #F2F3F5;
+    --text-muted: #B5BAC1;
+    --blurple: #5865F2;
+    --blurple-hover: #4752C4;
+    --danger: #FA777C;
+    --nav-bg: #232428;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #313338;
+    min-height: 100vh;
+    display: block; /* On s'assure qu'aucun flex ne pousse le contenu */
+}
+
+/* On s'assure que le container de login ne crée pas de scroll ou d'espace */
+.auth-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed; /* Fixé pour ne pas impacter le reste du site */
+    top: 0;
+    left: 0;
+    background-color: #313338;
+    z-index: 999;
+}
+
+#dashboard-page {
+    margin: 0;
+    padding: 0;
+    display: block;
+    width: 100%;
+}
+
+.user-bar {
+    margin: 0;
+    padding: 10px 20px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #232428;
+    border-bottom: 1px solid #1e1f22;
+}
+.user-infos-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.username-badge {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+
+.storage-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.storage-bar-bg {
+    width: 80px;
+    height: 6px;
+    background: #444;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.storage-bar-fill {
+    height: 100%;
+    background: var(--blurple);
+    width: 1%;
+}
+
+#storage-info {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* 5. CONTENU & MOSAÏQUE */
+.content-view {
+    padding: 30px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.mosaic-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.mosaic-item {
+    aspect-ratio: 16 / 10;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 2px dashed #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+    .mosaic-item.active {
+        border: 2px solid var(--blurple);
+        cursor: pointer;
+    }
+
+        .mosaic-item.active:hover {
+            background: #35373c;
+            transform: translateY(-3px);
+        }
+
+/* 6. BOUTONS & FORM */
+.btn-new {
+    background: #23a559;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 20px auto;
+    display: block;
+}
+
+.btn-logout-top {
+    background: #da373c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    background-color: #1E1F22;
+    border: none;
+    border-radius: 3px;
+    color: white;
+}
+
+.separator {
+    border: 0;
+    border-top: 1px solid #4e5058;
+    margin: 40px 0;
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Pro - Connexion</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<div class="auth-card">
+    <body>
+
+        <div id="login-page" class="auth-container">
+            <form id="login-form" class="auth-card" onsubmit="event.preventDefault(); handleLogin();">
+                <h2>Bienvenue !</h2>
+                <p class="subtitle">Nous sommes ravis de vous revoir !</p>
+
+                <div class="form-group">
+                    <label for="username">NOM D'UTILISATEUR</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">MOT DE PASSE</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+
+                <button type="submit" id="btn-login">Se connecter</button>
+                <p id="error-msg" class="error"></p>
+            </form>
+        </div>
+</div>
+
+<div id="dashboard-page" class="hidden">
+    <nav class="user-bar">
+        <div class="user-infos-left">
+            <span id="user-display" class="username-badge"></span>
+            <div class="storage-section">
+                <span id="storage-info">Stockage : 0%</span>
+                <div class="storage-bar-bg">
+                    <div id="storage-fill" class="storage-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button onclick="handleLogout()" class="btn-logout-top">Déconnexion</button>
+        </div>
+    </nav>
+
+    <div id="menu-view" class="content-view">
+
+        <section class="mosaic-container">
+            <div id="preview-mosaic" class="mosaic-grid">
+            </div>
+        </section>
+
+        <div class="actions-row">
+            <button class="btn-new" onclick="createNewPlanning()">+ Créer un nouveau planning</button>
+        </div>
+
+        <hr class="separator">
+
+        <div id="plannings-list" class="full-list-grid">
+        </div>
+    </div>
+</div>
+
+    <div id="editor-view" class="content-view hidden">
+        <button onclick="showMenu()" class="btn-back">⬅ Retour</button>
+        <div id="calendar-root"></div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
