@@ -1,58 +1,79 @@
 /* 1. RESET & VARIABLES */
 :root {
-    --bg-dark: #313338;
-    --bg-card: #2B2D31;
-    --text-main: #F2F3F5;
-    --text-muted: #B5BAC1;
-    --blurple: #5865F2;
-    --blurple-hover: #4752C4;
-    --danger: #FA777C;
-    --nav-bg: #232428;
+    /* Couleurs de fond (Niveaux de profondeur Discord) */
+    --bg-darker: #1e1f22; /* Fond le plus sombre (Inputs, Barre latérale) */
+    --bg-dark: #313338; /* Fond principal */
+    --bg-card: #2b2d31; /* Cartes et éléments secondaires */
+    --bg-light: #35373c; /* Hover et éléments interactifs */
+    /* Couleurs de texte (Contraste maximal) */
+    --text-main: #f2f3f5; /* Blanc cassé (Très lisible) */
+    --text-muted: #b5bac1; /* Gris clair pour le secondaire */
+    --text-dark: #949ba4; /* Gris moyen pour les labels */
+    /* Accents (Couleurs vives) */
+    --blurple: #5865f2; /* Bleu Discord */
+    --blurple-hover: #4752c4;
+    --success: #23a559; /* Vert succès */
+    --danger: #fa777c; /* Rouge/Rose alertes */
+    --warning: #f0b232; /* Jaune stats/horaires */
 }
 
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
     margin: 0;
     padding: 0;
-    background-color: #313338;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Whitney', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     min-height: 100vh;
-    display: block; /* On s'assure qu'aucun flex ne pousse le contenu */
 }
 
-/* On s'assure que le container de login ne crée pas de scroll ou d'espace */
+.hidden {
+    display: none !important;
+}
+
+/* 2. AUTHENTIFICATION */
 .auth-container {
     width: 100%;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: fixed; /* Fixé pour ne pas impacter le reste du site */
+    position: fixed;
     top: 0;
     left: 0;
-    background-color: #313338;
+    background-color: var(--bg-dark);
     z-index: 999;
 }
 
+.auth-card {
+    background: var(--bg-card);
+    padding: 32px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+/* 3. DASHBOARD & NAVIGATION */
 #dashboard-page {
-    margin: 0;
-    padding: 0;
-    display: block;
     width: 100%;
 }
 
 .user-bar {
-    margin: 0;
+    background-color: var(--bg-darker);
+    border-bottom: 1px solid #1c1d1f;
     padding: 10px 20px;
-    height: 60px;
+    height: 65px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #232428;
-    border-bottom: 1px solid #1e1f22;
 }
+
 .user-infos-left {
     display: flex;
     flex-direction: column;
@@ -89,7 +110,7 @@ body {
     color: var(--text-muted);
 }
 
-/* 5. CONTENU & MOSAÏQUE */
+/* 4. CONTENU & MOSAÏQUE */
 .content-view {
     padding: 30px 20px;
     max-width: 1100px;
@@ -113,7 +134,6 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    cursor: default;
 }
 
     .mosaic-item.active {
@@ -122,21 +142,128 @@ body {
     }
 
         .mosaic-item.active:hover {
-            background: #35373c;
+            background: var(--bg-light);
             transform: translateY(-3px);
         }
 
-/* 6. BOUTONS & FORM */
+/* 5. PLANNING VERTICAL */
+.calendar-list {
+    padding: 20px 10px 180px 10px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.day-row {
+    display: flex;
+    align-items: center;
+    background: var(--bg-card);
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 12px;
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border-left: 5px solid transparent;
+    transition: transform 0.1s;
+}
+
+    .day-row:active {
+        transform: scale(0.98);
+        background: var(--bg-light);
+    }
+
+.day-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+}
+
+.day-num {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.day-name {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.day-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.day-company {
+    font-weight: bold;
+    font-size: 1.05rem;
+    color: var(--text-main);
+}
+
+.day-hours {
+    color: var(--warning);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* 6. FORMULAIRES, BOUTONS & INPUTS */
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    color: var(--text-dark);
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--bg-darker) !important;
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 4px;
+    color: #dbdee1;
+    font-size: 1rem;
+}
+
+    input:focus, select:focus {
+        border-color: var(--blurple);
+        outline: none;
+    }
+
 .btn-new {
-    background: #23a559;
+    background: var(--success);
     color: white;
     border: none;
     padding: 12px 24px;
-    border-radius: 5px;
+    border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
     margin: 20px auto;
     display: block;
+    transition: background 0.2s;
+}
+
+    .btn-new:hover {
+        background: #1a7a42;
+    }
+
+.btn-secondary {
+    background: #4e5058;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 .btn-logout-top {
@@ -148,30 +275,631 @@ body {
     cursor: pointer;
 }
 
-.form-group {
-    text-align: left;
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    background-color: #1E1F22;
-    border: none;
-    border-radius: 3px;
-    color: white;
-}
-
 .separator {
     border: 0;
     border-top: 1px solid #4e5058;
     margin: 40px 0;
 }
+
+/* 7. MODALS & DRAWERS (VOLETS) */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    background: var(--bg-dark);
+    width: 90%;
+    max-width: 400px;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.drawer {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100%;
+    background-color: var(--bg-card);
+    box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+    transition: right 0.3s ease;
+    z-index: 1001;
+    padding: 20px;
+    max-width: 100%;
+}
+
+    .drawer.open {
+        right: 0;
+    }
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+}
+
+/* 8. STATS PANEL */
+.stats-panel {
+    margin: 20px auto 50px auto;
+    max-width: 800px;
+    background: var(--bg-darker);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+.stat-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--blurple);
+}
+
+/* 9. RESPONSIVE MOBILE */
+@media (max-width: 600px) {
+    .mosaic-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .day-row {
+        padding: 18px;
+    }
+
+    .day-num {
+        font-size: 1.4rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+/* 8. STATS PANEL (Modifié : Flux normal à la fin) */
+
+/* Couleurs Week-end & Férié */
+.day-row.saturday {
+    background: rgba(88, 101, 242, 0.08);
+}
+.day-row.sunday {
+    background: rgba(88, 101, 242, 0.08);
+}
+/* Teinte bleue plus forte */
+.day-row.ferie {
+    border-left: 5px solid var(--warning);
+}
+/* Barre jaune pour férié */
+
+/* Nettoyage Input KM (Retrait flèches) */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.btn-add-shift {
+    display: none;
+}
+/* Header du planning */
+.planning-header-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    background: var(--bg-darker);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Le gros bouton retour */
+.btn-back-large {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 2px solid var(--bg-light);
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+    .btn-back-large:hover {
+        background-color: var(--bg-light);
+        border-color: var(--blurple);
+    }
+
+    .btn-back-large:active {
+        transform: scale(0.95);
+    }
+
+    .btn-back-large svg {
+        color: var(--blurple);
+    }
+
+/* Ajustement du titre du planning */
+#current-planning-title {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    font-weight: 800;
+}
+/* Barre Supérieure */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--bg-darker);
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 60px;
+}
+
+.top-bar-left, .top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+#btn-options-planning:hover {
+    background: var(--bg-card);
+    border-color: var(--blurple);
+}
+
+.nav-title {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    text-transform: capitalize;
+    margin-left: 15px;
+}
+
+.username {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Bouton Icone (Retour) */
+.btn-icon {
+    background: var(--bg-light);
+    border: none;
+    color: var(--blurple);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+    .btn-icon:hover {
+        background: var(--bg-card);
+    }
+
+.btn-logout {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/*TOOL BAR*/
+.toolbar {
+    display: flex;
+    align-items: center;
+    background: var(--bg-darker);
+    padding: 4px;
+    border-radius: 8px;
+    gap: 5px;
+    margin-left: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn-tool {
+    background: var(--bg-card);
+    border: none;
+    color: var(--text-muted);
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .btn-tool:hover {
+        background: var(--bg-light);
+        color: var(--text-main);
+        transform: scale(1.1);
+    }
+
+.btn-danger-tool:hover {
+    background: var(--danger) !important;
+    color: white !important;
+}
+
+/* Style pour l'affichage en ligne des entreprises */
+.companies-horizontal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.company-row-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-card);
+    padding: 12px 20px;
+    border-radius: 8px;
+    border-left: 5px solid var(--blurple);
+    font-size: 0.95rem;
+}
+
+    .company-row-inline .info-group {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .company-row-inline b {
+        color: var(--text-main);
+    }
+
+    .company-row-inline span {
+        color: var(--text-muted);
+    }
+
+    /*PARTIE MEDIA*/
+/* Écrans Larges (PC) */
+@media (min-width: 1024px) {
+    #side-drawer,
+    #drawer-overlay,
+    #btn-add-mobile,
+    .btn-secondary[onclick*="toggleDrawer"] {
+        display: none !important;
+    }
+
+    #side-drawer {
+        width: 450px;
+    }
+}
+
+/* Écrans Mobiles */
+@media (max-width: 1023px) {
+    #companies-list-desktop,
+    #quick-add-company-pc {
+        display: none !important;
+    }
+
+    .btn-secondary {
+        display: block;
+        width: 100%;
+    }
+
+    .mosaic-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.vertical-toolbar {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-darker);
+    padding: 10px;
+    border-radius: 12px;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 100;
+}
+
+.btn-tool {
+    width: 40px;
+    height: 40px;
+}
+
+}
+
+.flex-center-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: calc(100vh - 80px);
+    width: 100%;
+    padding: 20px;
+}
+.toolbar-left-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 10px;
+    padding: 4px;
+    background: var(--bg-darker);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Boutons en forme de cercles */
+.btn-tool-circle {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+    .btn-tool-circle:hover {
+        background: var(--bg-light);
+    }
+.vertical-floating-toolbar {
+    position: fixed; /* Reste en place au scroll */
+    left: 20px; /* Distance du bord gauche */
+    top: 50%; /* Centré verticalement */
+    transform: translateY(-50%); /* Ajustement parfait du centrage */
+
+    display: flex;
+    flex-direction: column; /* Aligne les boutons verticalement (l'un sous l'autre) */
+
+    background: var(--bg-darker); /* Couleur de fond de la bulle */
+    padding: 12px;
+    border-radius: 50px; /* Forme de pillule/bulle arrondie */
+    gap: 15px; /* Espace entre chaque bouton */
+
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); /* Ombre pour l'effet flottant */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000; /* Passe au dessus de tout */
+}
+
+/* Style des boutons à l'intérieur */
+.btn-tool-float {
+    background: var(--bg-card);
+    border: none;
+    font-size: 1.5rem; /* Taille des emojis */
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%; /* Boutons bien ronds */
+    transition: all 0.2s ease;
+}
+
+    /* Effets au survol */
+    .btn-tool-float:hover {
+        background: var(--bg-light);
+        transform: scale(1.1); /* Grossit légèrement */
+    }
+
+/* Couleur spéciale pour le bouton supprimer au survol */
+.btn-danger-float:hover {
+    background: var(--danger) !important;
+}
+/* Container du Switch */
+.switch-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--bg-darker);
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+#switch-label-text {
+    font-weight: bold;
+    min-width: 40px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+/* Le Switch (Slider) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--warning); /* Jaune par défaut (Jour) */
+    transition: .3s;
+    border-radius: 24px;
+}
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+/* État Nuit (Checked) */
+input:checked + .slider {
+    background-color: var(--blurple); /* Bleu */
+}
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+   /* ##################################*/
+/* Container principal */
+.ios-switch-wrapper {
+    display: flex;
+    justify-content: left;
+    padding: 10px 0;
+}
+
+.ios-switch {
+    position: relative;
+    display: inline-block;
+    width: 85px; /* Plus large pour accueillir le texte */
+    height: 34px;
+    cursor: pointer;
+}
+
+    .ios-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+/* La capsule (Background) */
+.ios-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--blurple); /* Bleu par défaut (Nuit) */
+    border-radius: 34px;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    overflow: hidden;
+}
+
+/* Le curseur blanc */
+.ios-thumb {
+    position: absolute;
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Textes à l'intérieur */
+.label-day, .label-night {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 0.2s;
+    user-select: none;
+}
+
+.label-day {
+    right: 12px;
+    color: #fff;
+    opacity: 0; /* Caché quand c'est nuit */
+}
+
+.label-night {
+    right: 12px;
+    color: #fff;
+    opacity: 1;
+}
+
+/* ÉTAT ACTIVÉ (JOUR - car le switch est inversé logiquement par le défaut) */
+/* Note : Pour que par défaut ce soit JOUR, on va inverser la logique dans le JS ou via checked */
+
+input:checked + .ios-slider {
+    background-color: var(--warning); /* Jaune */
+}
+
+    input:checked + .ios-slider .ios-thumb {
+        transform: translateX(51px); /* Déplacement à droite */
+    }
+
+    input:checked + .ios-slider .label-day {
+        opacity: 1;
+        left: 12px; /* Apparaît à gauche du curseur */
+        right: auto;
+    }
+
+    input:checked + .ios-slider .label-night {
+        opacity: 0;
+    }

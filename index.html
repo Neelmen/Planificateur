@@ -2,74 +2,243 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planning Pro - Connexion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Planning Pro</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<div class="auth-card">
-    <body>
+<body>
 
-        <div id="login-page" class="auth-container">
-            <form id="login-form" class="auth-card" onsubmit="event.preventDefault(); handleLogin();">
-                <h2>Bienvenue !</h2>
-                <p class="subtitle">Nous sommes ravis de vous revoir !</p>
+    <div id="login-page" class="auth-container">
+        <form id="login-form" class="auth-card" onsubmit="event.preventDefault(); handleLogin();">
+            <h2>Bienvenue !</h2>
+            <p class="subtitle">Nous sommes ravis de vous revoir !</p>
+            <div class="form-group">
+                <label for="username">NOM D'UTILISATEUR</label>
+                <input type="text" id="username" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">MOT DE PASSE</label>
+                <input type="password" id="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" id="btn-login">Se connecter</button>
+            <p id="error-msg" class="error"></p>
+        </form>
+    </div>
 
-                <div class="form-group">
-                    <label for="username">NOM D'UTILISATEUR</label>
-                    <input type="text" id="username" name="username" autocomplete="username" required>
-                </div>
+    <div id="dashboard-page" class="hidden">
+        <nav class="top-bar">
+            <div class="top-bar-left">
+                <button class="btn-icon" onclick="backToMenu()">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+                    </svg>
+                </button>
+                <span class="nav-title" id="nav-page-title">Menu</span>
+            </div>
 
-                <div class="form-group">
-                    <label for="password">MOT DE PASSE</label>
-                    <input type="password" id="password" name="password" autocomplete="current-password" required>
-                </div>
+            <div class="top-bar-right">
+                <span class="username" id="display-username"></span>
+                <button class="btn-logout" onclick="logout()">Quitter</button>
+            </div>
+        </nav>
+        <div id="setup-planning-view" class="content-view hidden">
+            <div class="flex-center-container">
+                <div class="auth-card" style="margin-top: 0vh; max-width: 400px; width: 100%;">
+                    <h2 id="setup-title">Nouveau Planning</h2>
+                    <p class="subtitle" style="color: var(--text-muted); margin-bottom: 20px;">Choisissez la période du planning</p>
 
-                <button type="submit" id="btn-login">Se connecter</button>
-                <p id="error-msg" class="error"></p>
-            </form>
-        </div>
-</div>
+                    <div class="form-group">
+                        <label>MOIS</label>
+                        <select id="setup-month-select" class="custom-select"></select>
+                    </div>
 
-<div id="dashboard-page" class="hidden">
-    <nav class="user-bar">
-        <div class="user-infos-left">
-            <span id="user-display" class="username-badge"></span>
-            <div class="storage-section">
-                <span id="storage-info">Stockage : 0%</span>
-                <div class="storage-bar-bg">
-                    <div id="storage-fill" class="storage-bar-fill"></div>
+                    <div class="form-group">
+                        <label>ANNÉE</label>
+                        <select id="setup-year-select" class="custom-select"></select>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 30px;">
+                        <button class="btn-secondary" onclick="backToMenu()" style="flex:1;">Retour</button>
+                        <button class="btn-new" onclick="confirmCreatePlanning()" style="flex:2; margin:0;">Continuer</button>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="nav-right">
-            <button onclick="handleLogout()" class="btn-logout-top">Déconnexion</button>
-        </div>
-    </nav>
 
-    <div id="menu-view" class="content-view">
+        <div id="menu-view" class="content-view">
+            <section class="mosaic-container">
+                <div id="preview-mosaic" class="mosaic-grid"></div>
+            </section>
 
-        <section class="mosaic-container">
-            <div id="preview-mosaic" class="mosaic-grid">
+            <div class="actions-row">
+                <button class="btn-new" onclick="createNewPlanning()">Créer un nouveau planning</button>
             </div>
-        </section>
 
-        <div class="actions-row">
-            <button class="btn-new" onclick="createNewPlanning()">+ Créer un nouveau planning</button>
+            <hr class="separator">
+
+            <div id="companies-manager-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0; font-size: 1.2rem;">Gestion des Entreprises</h2>
+                    <button id="btn-add-mobile" class="btn-secondary" onclick="toggleDrawer(true)">+ Ajouter une société</button>
+                </div>
+
+                <div id="quick-add-company-pc" style="margin-top: 20px;">
+                    <button id="btn-show-form-pc" class="btn-back-large" onclick="toggleCompanyFormPC(true)" style="max-width: 100%; margin-bottom: 15px;">
+                        Nouvelle Entreprise
+                    </button>
+
+                    <div id="form-container-pc" class="hidden">
+                        <div class="company-row-inline" style="border-left: 5px solid var(--blurple); gap: 10px; flex-wrap: wrap;">
+                            <input type="text" id="pc-comp-name" placeholder="Nom" style="flex: 2; min-width: 150px;">
+                            <input type="number" id="pc-comp-salary" placeholder="Salaire Brut" style="flex: 1; min-width: 100px;">
+                            <select id="pc-comp-type" style="flex: 1; min-width: 100px;">
+                                <option value="CDI">CDI</option>
+                                <option value="CDD">CDD</option>
+                            </select>
+                            <input type="color" id="pc-comp-color" value="#5865F2" style="width: 50px; padding: 2px; height: 45px;">
+
+                            <div style="display: flex; gap: 5px;">
+                                <button onclick="saveCompanyPC()" class="btn-icon" style="background: var(--success); color: white; padding: 10px 15px;">Ajouter</button>
+                                <button onclick="toggleCompanyFormPC(false)" class="btn-icon" style="background: var(--bg-light); color: var(--text-muted);">Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="companies-list-desktop" class="companies-horizontal-list">
+                </div>
+            </div>
         </div>
 
-        <hr class="separator">
+        <div id="planning-view" class="content-view hidden">
 
-        <div id="plannings-list" class="full-list-grid">
+            <div id="planning-toolbar" class="vertical-floating-toolbar hidden">
+                <button class="btn-tool-float" onclick="window.print()" title="Imprimer">🖨️</button>
+                <button class="btn-tool-float" onclick="resetCurrentPlanning()" title="Effacer tout">🧼</button>
+                <button class="btn-tool-float btn-danger-float" onclick="showDeleteConfirm()" title="Supprimer">🗑️</button>
+            </div>
+
+            <div id="delete-confirm-modal" class="modal hidden">
+                <div class="flex-center-container">
+                    <div class="auth-card" style="margin-top: 10vh; max-width: 400px; width: 100%; border: 2px solid var(--danger);">
+                        <h2 style="color: var(--danger);">Attention !</h2>
+                        <p style="margin: 20px 0; color: var(--text-main);">Es-tu sûr de vouloir supprimer définitivement ce planning ?</p>
+
+                        <div style="display: flex; gap: 15px;">
+                            <button class="btn-new" onclick="deleteCurrentPlanning()" style="background: var(--danger); flex: 1; margin: 0;">OUI</button>
+                            <button class="btn-secondary" onclick="closeDeleteConfirm()" style="flex: 1;">NON</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="calendar-vertical-list" class="calendar-list"></div>
+            <div id="stats-panel" class="stats-panel">
+                <h3 style="text-align: center; color: var(--text-muted);">Informations complémentaires</h3>
+                <div class="stats-grid">
+                </div>
+            </div>
+        </div>
+
+        <div id="shift-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-date-title">Jour X</h3>
+                </div>
+                <form id="shift-form" onsubmit="event.preventDefault(); saveShift();">
+                    <input type="hidden" id="edit-day-number">
+                    <div class="form-group">
+                        <label for="shift-company">ACTIVITÉ</label>
+                        <select id="shift-company">
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>TYPE DE SERVICE</label>
+                        <div class="ios-switch-wrapper">
+                            <label class="ios-switch">
+                                <input type="checkbox" id="is-night-mode" onchange="updateSwitchUI()">
+                                <div class="ios-slider">
+                                    <span class="label-day">JOUR</span>
+                                    <span class="label-night">NUIT</span>
+                                    <div class="ios-thumb"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>HORAIRES (ex: 07h-19h)</label>
+                        <input type="text" id="shift-hours" placeholder="00h-00h">
+                    </div>
+                    <div class="form-group">
+                        <label>TRAJET (KM)</label>
+                        <input type="number" id="shift-km" placeholder="0">
+                    </div>
+
+                    <button type="submit" class="btn-new" style="width: 100%;">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="side-drawer" class="drawer">
+            <div class="drawer-content">
+                <div class="drawer-header">
+                    <h3>Gestion Entreprises</h3>
+                    <button onclick="toggleDrawer(false)" class="btn-close">×</button>
+                </div>
+                <form id="company-form" onsubmit="event.preventDefault(); saveCompany();">
+                    <div class="form-group">
+                        <label>NOM DE LA SOCIÉTÉ</label>
+                        <input type="text" id="comp-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>SALAIRE BRUT</label>
+                        <input type="number" id="comp-salary" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CONTRAT</label>
+                        <select id="comp-type">
+                            <option value="CDI">CDI</option>
+                            <option value="CDD">CDD (+20%)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>COULEUR</label>
+                        <input type="color" id="comp-color" value="#5865F2">
+                    </div>
+                    <button type="submit" class="btn-new">Enregistrer</button>
+                </form>
+                <hr class="separator">
+                <div id="companies-list" class="mini-list"></div>
+            </div>
+        </div>
+
+        <div id="drawer-overlay" class="overlay hidden" onclick="toggleDrawer(false); closeShiftModal();"></div>
+
+        <div id="planning-toolbar" class="vertical-toolbar hidden">
+            <button class="btn-tool" onclick="window.print()" title="Imprimer">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" />
+                    <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z" />
+                </svg>
+            </button>
+
+            <button class="btn-tool" onclick="resetCurrentPlanning()" title="Effacer tout">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M16.24 3.56l4.95 4.94c.78.79.78 2.05 0 2.84L12 20.53a4.008 4.008 0 0 1-5.66 0L2.81 17c-.78-.79-.78-2.05 0-2.84l10.6-10.6c.79-.78 2.05-.78 2.83 0zM4.22 15.58l3.54 3.53c.78.79 2.04.79 2.83 0l3.53-3.53-7.07-7.07-2.83 2.83c-.39.39-.39 1.03 0 1.42l1-.99 1.42 1.41-1.72 1.73c-.39.39-1.02.39-1.41 0l-1.42-1.41 1.25-1.25c-.39-.39-1.03-.39-1.42 0l-1.73 1.73c-.39.39-.39 1.02 0 1.41z" />
+                </svg>
+            </button>
+
+            <button class="btn-tool btn-danger-tool" onclick="showDeleteConfirm()" title="Supprimer le planning">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                </svg>
+            </button>
         </div>
     </div>
-</div>
-
-    <div id="editor-view" class="content-view hidden">
-        <button onclick="showMenu()" class="btn-back">⬅ Retour</button>
-        <div id="calendar-root"></div>
-    </div>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
