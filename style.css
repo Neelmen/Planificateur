@@ -15,6 +15,7 @@
     --success: #23a559; /* Vert succès */
     --danger: #fa777c; /* Rouge/Rose alertes */
     --warning: #f0b232; /* Jaune stats/horaires */
+    --weekend-filter: brightness(0.7) contrast(1.1); /* Le filtre qui va obscurcir */
 }
 
 * {
@@ -1007,7 +1008,7 @@ transition: all 0.2s;
         align-items: stretch;
         box-sizing: border-box;
     }
-    
+
     .week-block {
         flex: 1 !important;
         min-width: 250px !important;
@@ -1022,6 +1023,9 @@ transition: all 0.2s;
         flex-direction: column;
         height: 100%;
         flex-shrink: 0 !important;
+        grid-template-rows: repeat(7, minmax(60px, auto));
+        gap: 10px;
+        margin-bottom: 20px;
     }
     
     .week-block:hover {
@@ -1041,12 +1045,41 @@ transition: all 0.2s;
         letter-spacing: 1px;
         border-bottom: 2px solid #40444b;
     }
-    
+
     .week-content {
         padding: 6px;
         flex: 1;
         overflow-y: auto;
         overflow-x: hidden;
+        /* Ajouts pour l'alignement */
+        display: flex;
+        flex-direction: column;
+        align-items: stretch; /* Force les enfants à prendre toute la largeur */
+        gap: 0px 10px; /* Optionnel : gère l'espace entre tes lignes proprement */
+    }
+    .day-row.grid-layout.is-empty {
+        visibility: hidden;
+        /* Sécurités pour éviter les bugs d'affichage */
+        pointer-events: none; /* Pas de clic possible */
+        user-select: none; /* Pas de sélection de texte */
+        background: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+    }
+    .day-row {
+        min-height: 40px; /* Force une taille même si vide */
+        display: grid;
+        /* Garde ta structure de colonnes actuelle ici */
+    }
+        /* On cible spécifiquement le slot vide pour le rendre invisible */
+    .day-row.is-empty {
+            visibility: hidden;
+            height: inherit; /* Récupère les 60px du .day-row */
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            pointer-events: none;
+            margin-bottom: 6px; /* Doit être identique au margin-bottom du day-row */
     }
     
     .week-content::-webkit-scrollbar {
@@ -1193,7 +1226,7 @@ transition: all 0.2s;
 /* Conteneur principal */
 .day-row.grid-layout {
     display: grid;
-    grid-template-columns: 40px 100px 80px 10px 1fr;
+    grid-template-columns: 35px 100px 80px 10px;
     grid-template-rows: auto 1.19rem;
     background: #36393f;
     border-radius: 8px;
@@ -1209,6 +1242,9 @@ transition: all 0.2s;
     width: 100%;
     box-sizing: border-box;
 }
+div.day-row.grid-layout:hover {
+    background-color: #464a52 !important; /* Force le changement de couleur */
+    cursor: pointer;
 }
 
 .day-row.grid-layout:hover {
@@ -1221,10 +1257,16 @@ transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.day-row.grid-layout.weekend {
-    background: #2a2b2e;
-    opacity: 0.8;
-}
+    .day-row.grid-layout.weekend {
+        background: #4a4d52; /* Ta couleur de base actuelle */
+        filter: var(--weekend-filter); /* Application du filtre via la variable */
+        opacity: 1; /* On remet l'opacité à 1 car le filter brightness fait déjà le travail proprement */
+        border-left: 2px solid rgba(0, 0, 0, 0.3); /* Optionnel : démarque un peu plus le bord */
+    }
+    .day-row.grid-layout.weekend:hover {
+        filter: none;
+        background: #40444b;
+    }
 
 /* Cellules de grille */
 .grid-cell {
@@ -1254,9 +1296,22 @@ transition: all 0.2s;
     grid-column: 2;
     grid-row: 1;
     color: #dcddde;
-    font-size: 14px;
     font-weight: 600;
 }
+
+.cell-3 {
+    grid-column: 3;
+    grid-row: 1;
+    color: #b9bbbe;
+}
+
+.cell-4 {
+    grid-column: 4;
+    grid-row: 1;
+    color: #b9bbbe;
+    justify-content: flex-end;
+}
+
 /*FORMATAGE CELLULE 2*/
 .grid-cell.cell-2 {
     width: 100px; /* Force la largeur */
@@ -1289,10 +1344,15 @@ transition: all 0.2s;
 }
 
 .cell-4 {
-    grid-column: 4;
+    grid-column: 4 / 6; /* On l'étend jusqu'à la fin de la ligne pour plus d'espace */
     grid-row: 1;
-    color: #b9bbbe;
-    justify-content: flex-end;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    justify-content: flex-end; /* Aligne le chiffre à droite */
+    align-items: center;
+    padding-right: 5px;
 }
 
 /* LIGNE 2: DAYNAME, JOUR/NUIT, site */
@@ -1311,19 +1371,23 @@ transition: all 0.2s;
     color: #f0b232;
     font-weight: 600;
     font-size: 10px;
+    white-space: nowrap;
 }
 
+/* Cellules 7-8-9-10 (Zone de texte/Site) mis à jour */
 .cell-7-8 {
-    grid-column: 3 / 5;
+    grid-column: 2 / 6;
     grid-row: 2;
-    align-items: flex-end;
-    color: #b9bbbe;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Aligne le contenu à gauche */
+    color: var(--text-muted);
     font-style: italic;
     font-size: 11px;
-    font-size: 0.85rem;
-    color: var(--text-muted);
     border-top: 1px solid rgba(255,255,255,0.05);
     margin-top: 2px;
+    width: 100%;
+    overflow: hidden;
 }
 
 /* Switch jour/nuit compact pour chaque ligne */
@@ -1480,6 +1544,34 @@ input, select {
     padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
+}
+
+/* Couleurs selon le switch jour/nuit - Identique pour JOUR et NUIT */
+.grid-cell.cell-2.day-mode,
+.grid-cell.cell-2.night-mode {
+    color: var(--warning) !important; /* Orange pour les deux modes - Entreprise */
+}
+
+.grid-cell.cell-3.day-mode,
+.grid-cell.cell-3.night-mode {
+    color: var(--warning) !important; /* Orange pour les deux modes - Horaires */
+}
+
+.grid-cell.cell-4.day-mode,
+.grid-cell.cell-4.night-mode {
+    color: var(--warning) !important; /* Orange pour les deux modes - KM */
+}
+
+/* Fond plus clair pour le mode NUIT (couleur de lune) */
+.day-row.night-background {
+    background: linear-gradient(135deg, #4a5568, #2d3748) !important;
+    box-shadow: 0 2px 8px rgba(74, 85, 104, 0.3) !important;
+}
+.day-row.day-background {
+    background: #36393f !important; /* Couleur Discord "Has Work" */
+}
+.day-row.grid-layout:not(.night-background):not(.day-background) {
+    background: #36393f;
 }
 
 .separator {
@@ -1646,7 +1738,10 @@ input[type=number] {
 
 /* Ajustement du titre du planning */
 #current-planning-title {
-    margin: 0;
+    text-align: center;
+    width: 100%;
+    margin: 10px 0;
+    display: block;
     font-size: 1.5rem;
     color: var(--text-main);
     font-weight: 800;
@@ -2114,4 +2209,94 @@ input:checked + .ios-slider {
     right: 0; /* On le place en haut à droite */
     z-index: 1;
     pointer-events: none;
+}
+.btn-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(237, 66, 69, 1);
+    border: none;
+    color: #fff;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1;
+    font-size: 2rem;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+}
+
+    .btn-delete:hover {
+        background-color: rgba(237, 66, 69, 1);
+        transform: scale(1.5);
+    }
+
+    .btn-delete:active {
+        transform: scale(0.95); /* Effet de pression */
+    }
+
+/* --- GESTION DES ENTREPRISES (Inspiré du DayRow) --- */
+
+.company-manage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.company-card {
+    display: grid;
+    grid-template-columns: 6px 1fr auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--company-color, var(--blurple));
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 0px 0px;
+    min-height: auto;
+}
+
+    .company-card:hover {
+        background: var(--bg-light);
+        transform: translateX(10px);
+    }
+
+
+.company-details {
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
+
+.company-main-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.company-name-text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.company-site-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.company-actions {
+    display: flex;
+    align-items: center;
+    padding-right: 20px;
 }

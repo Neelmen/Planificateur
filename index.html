@@ -91,7 +91,10 @@
                     <h2 style="margin: 0; font-size: 1.2rem;">Gestion des Entreprises</h2>
                     <button id="btn-show-form-pc" class="btn-secondary" onclick="toggleCompanyFormPC(true)">+ Ajouter une entreprise</button>
                 </div>
-                
+
+                <div id="companies-list-desktop" class="companies-horizontal-list">
+                </div>
+
                 <!-- Formulaire PC pour ajouter une entreprise -->
                 <div id="form-container-pc" class="hidden" style="margin-bottom: 20px;">
                     <div class="auth-card">
@@ -100,7 +103,7 @@
                             <label for="pc-comp-name">NOM DE L'ENTREPRISE</label>
                             <input type="text" id="pc-comp-name" required>
                         </div>
-                                                <div class="form-group">
+                        <div class="form-group">
                             <label for="pc-comp-salary">TAUX HORAIRE BRUT (€)</label>
                             <input type="number" id="pc-comp-salary" step="0.01" required>
                         </div>
@@ -109,8 +112,6 @@
                             <select id="pc-comp-type" class="custom-select">
                                 <option value="CDI">CDI</option>
                                 <option value="CDD">CDD</option>
-                                <option value="INTERIM">INTÉRIM</option>
-                                <option value="FREELANCE">FREELANCE</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -123,7 +124,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div id="companies-list-desktop" class="companies-horizontal-list"></div>
             </div>
         </div>
@@ -278,9 +279,14 @@
                     </div>
                     <div class="editrow-form-group">
                         <label class="editrow-label">LIEU DE TRAVAIL</label>
-                        <input type="text" id="editrow-site" class="editrow-input" placeholder="Entrez ou choisissez un site" list="site-suggestions">
+                        <input type="text"
+                               id="editrow-site"
+                               class="editrow-input"
+                               placeholder="ENTREZ UN SITE"
+                               list="site-suggestions"
+                               oninput="this.value = this.value.toUpperCase()"
+                        >                        
                         <datalist id="site-suggestions">
-                            <!-- Les options seront ajoutées dynamiquement par JavaScript -->
                         </datalist>
                     </div>
                     <div class="editrow-form-group">

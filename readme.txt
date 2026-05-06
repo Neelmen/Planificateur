@@ -26,7 +26,6 @@ date_jour: date
 horaire_saisi: texte
 km: float8
 is_ferie: bool
-type_jour: texte
 user_id: uuid
 is_night: bool
 site: texte
