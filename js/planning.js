@@ -1,6 +1,4 @@
 // --- planning.js ---
-// NOUVEAU SYSTÈME DE PLANNING - LOGIQUE MODERNE ET ROBUSTE
-
 // État global du planning
 const PlanningState = {
     currentPlanning: null,
@@ -75,8 +73,7 @@ window.startPlanningCreation = async function() {
         state.currentPlanning = planningData;
 
         // Navigation vers la vue planning
-        document.getElementById('setup-planning-section')?.classList.add('hidden');
-        document.getElementById('planning-view')?.classList.remove('hidden');
+        showView('planning-view');
 
         // Mettre à jour le titre
         const titleEl = document.getElementById('current-planning-title');
@@ -142,18 +139,15 @@ async function generateCalendar() {
     } catch (error) {
         console.error('Erreur génération calendrier:', error);
     }
+    await loadPlanningData();
+    updatePlanningStats();
+
 }
 
-/**
- * Récupère les horaires à afficher dans la cell-3
- */
+
 function getCellHours(dayData) {
-    // Si pas de shift ou pas d'horaires, affiche vide
-    if (!dayData?.shift || !dayData.shift.horaire_saisi) {
-        return '';
-    }
-    
-    return dayData.shift.horaire_saisi;
+    const hours = dayData.shift?.horaire_saisi;
+    return hours ? formatTo24h(hours) : '';
 }
 
 /**
@@ -245,67 +239,97 @@ function organizeDaysIntoWeeks(daysInMonth, month, year) {
 function createWeekBlock(weekNumber, weekDays) {
     const weekBlock = document.createElement('div');
     weekBlock.className = 'week-block';
-    
-    // En-tête de semaine
-    const weekHeader = document.createElement('div');
-    weekHeader.className = 'week-header';
-    weekHeader.textContent = `Semaine ${weekNumber}`;
-    weekBlock.appendChild(weekHeader);
-    
-    // Contenu de la semaine
+
+    // Header systématique pour l'alignement vertical des blocs entre eux
+    const header = document.createElement('div');
+    header.className = 'week-header';
+    header.textContent = `Semaine ${weekNumber}`;
+    weekBlock.appendChild(header);
+
     const weekContent = document.createElement('div');
     weekContent.className = 'week-content';
-    
-    // Ajouter les jours de la semaine
+
+    const daySlots = new Array(7).fill(null);
     weekDays.forEach(dayData => {
-        const dayRow = createCompactDayRow(dayData);
-        weekContent.appendChild(dayRow);
+        const date = new Date(dayData.date);
+        let dayIndex = date.getDay();
+        dayIndex = (dayIndex === 0) ? 6 : dayIndex - 1;
+        daySlots[dayIndex] = dayData;
     });
-    
+
+    daySlots.forEach((dayData) => {
+        if (dayData) {
+            weekContent.appendChild(createCompactDayRow(dayData));
+        } else {
+            const ghostRow = document.createElement('div');
+            // On utilise EXACTEMENT les mêmes classes de structure
+            ghostRow.className = 'day-row grid-layout is-empty';
+
+            // On remplit avec du vide structurel pour forcer la hauteur de la grille
+            ghostRow.innerHTML = `
+                <div class="grid-cell cell-1">&nbsp;</div>
+                <div class="grid-cell cell-2">&nbsp;</div>
+                <div class="grid-cell cell-3">&nbsp;</div>
+                <div class="grid-cell cell-5">&nbsp;</div>
+                <div class="grid-cell cell-7-8">&nbsp;</div>
+            `;
+            weekContent.appendChild(ghostRow);
+        }
+    });
+
     weekBlock.appendChild(weekContent);
-    
     return weekBlock;
 }
-
-/**
- * Crée une ligne de jour compacte style Discord
- */
-/**
- * Crée une ligne de jour compacte style Discord (Optimisée)
- */
 function createCompactDayRow(dayData) {
     const dayRow = document.createElement('div');
     dayRow.className = 'day-row grid-layout';
     dayRow.setAttribute('data-day', dayData.day);
 
-    // 1. Gestion des classes de style
-    if (dayData.dayOfWeek === 6) { // Dimanche
+    if (dayData.dayOfWeek === 5 || dayData.dayOfWeek === 6) {
         dayRow.classList.add('weekend');
     }
 
-    // 2. Création des 5 colonnes pour la première ligne
+    // Positionnement dynamique
+    const rowIndex = getGridRowIndex(dayData.date);
+    dayRow.style.gridRow = rowIndex;
+    // Identification pour le debug
+    dayRow.setAttribute('data-day-index', rowIndex);
+
     const dayNames = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
-    const company = PlanningState.companies.find(c => c.id === dayData.shift?.entreprise_id);
-
-    // Structure grille avec numéro du jour, repos, horaires et nom du jour
     const dayName = dayNames[dayData.dayOfWeek] || '???';
+
+    // --- LOGIQUE DE FILTRAGE STRICTE ---
+    const isNight = dayData.shift?.is_night || false;
+    const isCompany = dayData.shift?.entreprise_id && dayData.shift.entreprise_id !== 'repos';
+
+    // On n'extrait les données que si c'est une entreprise, sinon on force le vide[cite: 1]
     const displayContent = getCellContent(dayData);
-    const displayHours = getCellHours(dayData);
+    const displayHours = isCompany ? getCellHours(dayData) : '';
+    const displaySite = isCompany ? (dayData.shift?.site || '') : '';
+    const kmValue = dayData.shift?.km;
+    const displayKm = (isCompany && kmValue > 0) ? `${kmValue} km` : '';
+
+    // Détermination des classes (uniquement si entreprise)[cite: 1]
+    const nightClass = (isNight && isCompany) ? 'night-mode' : (isCompany ? 'day-mode' : '');
+    const backgroundClass = (isCompany && isNight) ? 'night-background' : (isCompany ? 'day-background' : '');
+
     dayRow.innerHTML = `
-    <div class="grid-cell cell-1">${String(dayData.day).padStart(2, '0')}</div>
-    <div class="grid-cell cell-2">${displayContent}</div>
-    <div class="grid-cell cell-3">${displayHours}</div>
-    <div class="grid-cell cell-4"></div>
-    <div class="grid-cell cell-5">${dayName}</div>
-    <div class="grid-cell cell-6"></div>
-    <div class="grid-cell cell-7-8"></div>
-`;
-dayRow.style.borderLeft = '4px solid transparent';
-dayRow.classList.remove('has-work');
+        <div class="grid-cell cell-1">${String(dayData.day).padStart(2, '0')}</div>
+        <div class="grid-cell cell-2 ${nightClass}">${displayContent}</div>
+        <div class="grid-cell cell-3 ${nightClass}">${displayHours}</div>
+        <div class="grid-cell cell-4 ${nightClass}">${displayKm}</div>
+        <div class="grid-cell cell-5">${dayName}</div>
+        <div class="grid-cell cell-6"></div>
+        <div class="grid-cell cell-7-8 ${nightClass}">${displaySite}</div>
+    `;
 
-    // 4. Gestionnaire d'événement
+    // Reset et application des styles propres[cite: 1, 3]
+    dayRow.style.borderLeft = '4px solid transparent';
+    if (backgroundClass) {
+        dayRow.classList.add(backgroundClass);
+    }
+
     dayRow.onclick = () => openEditRow(dayData.day);
-
     return dayRow;
 }
 
@@ -401,31 +425,48 @@ function updateDayDisplayNew(dayData) {
     const dayRow = document.querySelector(`[data-day="${dayData.day}"]`);
     if (!dayRow) return;
 
+    // 1. Logique métier
+    const isCompany = dayData.shift?.entreprise_id && dayData.shift.entreprise_id !== 'repos';
+    const isNight = dayData.shift?.is_night || false;
+    const company = isCompany ? state.companies.find(c => String(c.id) === String(dayData.shift?.entreprise_id)) : null;
+
+    // 2. Préparation des données
     const dayNames = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
     const dayName = dayNames[dayData.dayOfWeek] || '???';
+
     const displayContent = getCellContent(dayData);
-    const displayHours = getCellHours(dayData);
-    
-    // Correction : On récupère l'entreprise pour la couleur (Source unique : state.companies)
-    const company = state.companies.find(c => c.id === dayData.shift?.entreprise_id);
+    const displayHours = isCompany ? getCellHours(dayData) : '';
+    const displaySite = isCompany ? (dayData.shift?.site || '') : '';
+    const kmValue = dayData.shift?.km || 0;
+    const displayKm = (isCompany && kmValue > 0) ? `${kmValue} km` : '';
+
+    // Classes CSS
+    const nightClass = (isNight && isCompany) ? 'night-mode' : (isCompany ? 'day-mode' : '');
+    const backgroundClass = (isCompany && isNight) ? 'night-background' : (isCompany ? 'day-background' : '');
+
+    // 3. Mise à jour du DOM
+    dayRow.className = `day-row grid-layout ${dayData.dayOfWeek >= 5 ? 'weekend' : ''}`;
 
     dayRow.innerHTML = `
         <div class="grid-cell cell-1">${String(dayData.day).padStart(2, '0')}</div>
-        <div class="grid-cell cell-2">${displayContent}</div>
-        <div class="grid-cell cell-3">${displayHours}</div>
-        <div class="grid-cell cell-4"></div>
+        <div class="grid-cell cell-2 ${nightClass}">${displayContent}</div>
+        <div class="grid-cell cell-3 ${nightClass}">${displayHours}</div>
+        <div class="grid-cell cell-4 ${nightClass}">${displayKm}</div>
         <div class="grid-cell cell-5">${dayName}</div>
         <div class="grid-cell cell-6"></div>
-        <div class="grid-cell cell-7-8"></div>
+        <div class="grid-cell cell-7-8 ${nightClass}">${displaySite}</div>
     `;
 
-    // APPLICATION DU STYLE (Le point qui manquait)
-    if (company && company.couleur_hex) {
-        dayRow.style.borderLeft = `4px solid ${company.couleur_hex}`;
+    // 4. Reset et Application des styles de bordure (Couleur entreprise)
+    dayRow.style.borderLeft = '4px solid transparent';
+    if (isCompany && company) {
         dayRow.classList.add('has-work');
-    } else {
-        dayRow.style.borderLeft = '4px solid transparent';
-        dayRow.classList.remove('has-work');
+        if (company.couleur_hex) {
+            dayRow.style.borderLeft = `4px solid ${company.couleur_hex}`;
+        }
+        if (backgroundClass) {
+            dayRow.classList.add(backgroundClass);
+        }
     }
 }
 
@@ -629,78 +670,57 @@ window.updateEditRowSwitchText = function() {
  */
 window.saveEditRow = async function () {
     try {
-        console.log('saveEditRow - Début de la fonction');
-
         const menu = document.getElementById('editrow-menu');
         const dayNumber = parseInt(menu?.getAttribute('data-current-day'));
 
-        if (!dayNumber || !PlanningState.currentPlanning?.id) {
-            console.error('saveEditRow - Données manquantes', { dayNumber, planningId: PlanningState.currentPlanning?.id });
-            return;
-        }
+        if (!dayNumber || !PlanningState.currentPlanning?.id) return;
 
-        // 1. Récupération des valeurs (avec les IDs corrects de ton HTML)
         const companyId = document.getElementById('editrow-company')?.value;
         const hours = document.getElementById('editrow-hours')?.value;
         const site = document.getElementById('editrow-site')?.value;
         const km = document.getElementById('editrow-km')?.value || '0';
-        const isNight = document.getElementById('editrow-is-night')?.checked; // ID corrigé ici
+        const isNight = document.getElementById('editrow-is-night')?.checked;
 
-        // 2. Préparation de la date ISO stable
         const dateISO = `${PlanningState.currentYear}-${String(PlanningState.currentMonth).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
 
-        // 3. Construction de l'objet shiftData
         const shiftData = {
             planning_id: PlanningState.currentPlanning.id,
-            entreprise_id: companyId === 'repos' || !companyId ? null : companyId,
+            entreprise_id: (companyId === 'repos' || !companyId) ? null : companyId,
             date_jour: dateISO,
             horaire_saisi: hours,
             site: site,
             km: parseFloat(km) || 0,
             is_night: !!isNight,
             user_id: state.user.id,
-            type_jour: isNight ? 'Nuit' : 'Jour',
             is_ferie: false
         };
 
         const dayData = PlanningState.days.find(d => d.day === dayNumber);
-
-        // 4. Gestion de l'ID pour éviter le conflit (Conflict 409)
-        // Si on a un ID de shift en local, on l'ajoute pour forcer l'UPDATE par l'upsert
         if (dayData?.shift?.id) {
             shiftData.id = dayData.shift.id;
         }
 
-        console.log('saveEditRow - Opération Upsert sur:', shiftData);
-
-        // 5. Utilisation de UPSERT au lieu de IF/ELSE (plus robuste)
         const { data, error } = await _supabase
             .from('shifts')
-            .upsert(shiftData, {
-                onConflict: 'planning_id, date_jour'
-            })
+            .upsert(shiftData, { onConflict: 'planning_id, date_jour' })
             .select()
             .single();
 
         if (error) throw error;
 
-        // 6. Mise à jour de l'état local et de l'UI (tes fonctions d'origine)
-        const currentDayData = PlanningState.days.find(d => d.day === dayNumber);
-        if (currentDayData) {
-            currentDayData.shift = data;
-            updateDayDisplayNew(currentDayData);
+        if (dayData) {
+            dayData.shift = data;
+            updateDayDisplayNew(dayData);
         }
+
         updatePlanningStats();
         closeEditRow();
-
-        console.log('saveEditRow - Sauvegarde terminée avec succès');
 
     } catch (error) {
         console.error('saveEditRow - Erreur:', error);
         alert('Erreur lors de la sauvegarde : ' + (error.message || 'Erreur inconnue'));
     }
 };
-
 
 
 
@@ -723,43 +743,53 @@ window.saveDayModal = async function() {
 function updatePlanningStats() {
     try {
         let totalHours = 0;
-        let totalKM = 0;
-        let totalSalary = 0;
+        let totalKm = 0;
+        let totalGrossSalary = 0;
         let workedDays = 0;
         let uniqueCompanies = new Set();
 
-        PlanningState.days.forEach(dayData => {
-            if (dayData.shift && dayData.shift.entreprise_id) {
-                // Calculer les heures
-                if (dayData.shift.horaire_saisi) {
-                    totalHours += parseHoursText(dayData.shift.horaire_saisi);
-                }
-                
-                // Ajouter les KM
-                totalKM += dayData.shift.km || 0;
-                
-                // Calculer le salaire
-                const company = PlanningState.companies.find(c => c.id === dayData.shift.entreprise_id);
+        PlanningState.days.forEach(day => {
+            const shift = day.shift;
+            if (shift && shift.entreprise_id && shift.entreprise_id !== 'repos') {
+                // Heures
+                const hours = parseHoursText(shift.horaire_saisi || "0");
+                totalHours += hours;
+
+                // Entreprise & Salaire
+                const company = state.companies.find(c => String(c.id) === String(shift.entreprise_id));
                 if (company) {
-                    const dayHours = parseHoursText(dayData.shift.horaire_saisi);
-                    totalSalary += dayHours * (company.taux_horaire_brut || 0);
                     uniqueCompanies.add(company.id);
+                    if (company.taux_horaire_brut) {
+                        totalGrossSalary += (hours * company.taux_horaire_brut);
+                    }
                 }
-                
+
+                // KM & Jours
+                totalKm += parseFloat(shift.km || 0);
                 workedDays++;
             }
         });
 
-        // Mettre à jour l'affichage avec les nouveaux IDs
+        // Conversion Brut -> Net (Ratio 0.77)
+        const totalNetSalary = totalGrossSalary * 0.77;
+
+        // Mise à jour du DOM avec formatage intelligent
         const hoursEl = document.getElementById('stat-hours');
         const salaryEl = document.getElementById('stat-salary');
         const kmEl = document.getElementById('stat-km');
         const daysEl = document.getElementById('stat-days');
         const companiesEl = document.getElementById('stat-companies');
 
-        if (hoursEl) hoursEl.textContent = formatHours(totalHours);
-        if (salaryEl) salaryEl.textContent = `${totalSalary.toFixed(2)}€`;
-        if (kmEl) kmEl.textContent = `${totalKM} km`;
+        if (hoursEl) {
+            const h = Math.floor(totalHours);
+            const m = Math.round((totalHours - h) * 60);
+            hoursEl.textContent = m > 0 ? `${h}h${m.toString().padStart(2, '0')}` : `${h}h`;
+        }
+
+        if (salaryEl) {
+            salaryEl.textContent = `${Math.ceil(totalNetSalary)}€`;
+        }
+        if (kmEl) kmEl.textContent = `${totalKm} km`;
         if (daysEl) daysEl.textContent = `${workedDays}/${PlanningState.days.length}`;
         if (companiesEl) companiesEl.textContent = uniqueCompanies.size;
 
@@ -771,21 +801,48 @@ function updatePlanningStats() {
 /**
  * Analyse le texte des heures (ex: "19h-07h")
  */
+/**
+ * Analyse de manière ultra-flexible le texte des heures (ex: "07h-19h", "7pm-7am", "07:30-15:45")
+ */
 function parseHoursText(hoursText) {
     if (!hoursText) return 0;
-    
-    const match = hoursText.match(/(\d+)h-(\d+)h/);
-    if (!match) return 0;
-    
-    let start = parseInt(match[1]);
-    let end = parseInt(match[2]);
-    
-    // Gérer les shifts de nuit (ex: 19h-07h)
-    if (end < start) {
-        end += 24;
+
+    // Nettoyage et séparation du début et de la fin (gère -, /, " à ", etc.)
+    const parts = hoursText.toLowerCase().split(/[-/]|(?:\s+à\s+)/);
+
+    const parsePart = (str) => {
+        if (!str) return null;
+        // Extrait les nombres et le modificateur am/pm
+        const match = str.match(/(\d+)(?:[h:/\s](\d+))?\s*(am|pm)?/);
+        if (!match) return null;
+
+        let hours = parseInt(match[1]);
+        let minutes = parseInt(match[2] || 0);
+        const meridian = match[3];
+
+        // Conversion AM/PM
+        if (meridian === 'pm' && hours < 12) hours += 12;
+        if (meridian === 'am' && hours === 12) hours = 0;
+
+        return hours + (minutes / 60);
+    };
+
+    const start = parsePart(parts[0]);
+    const end = parsePart(parts[1]);
+
+    if (start === null) return 0;
+
+    // Si une seule heure est saisie (ex: "7h"), on considère 0h de travail ou on attend la fin
+    if (end === null) return 0;
+
+    let duration = end - start;
+
+    // Gestion du passage à minuit (ex: 19h-07h)
+    if (duration < 0) {
+        duration += 24;
     }
-    
-    return end - start;
+
+    return duration;
 }
 
 /**
@@ -794,7 +851,7 @@ function parseHoursText(hoursText) {
 function formatHours(hours) {
     const h = Math.floor(hours);
     const m = Math.round((hours - h) * 60);
-    return `${h}h${m > 0 ? m : ''}`;
+    return `${h}h${m > 0 ? String(m).padStart(2, '0') : ''}`;
 }
 
 // --- GESTION DES 3 DERNIERS PLANNINGS ---
@@ -1371,3 +1428,148 @@ window.loadRecentPlanning = async function(boxNumber) {
         console.error('Erreur loadRecentPlanning:', error);
     }
 };
+/**
+ * Service de calcul de segmentation des heures
+ * Calcule : Heures Classiques, Nuit (21h-06h), Dimanche, Jours Fériés
+ */
+const HoursCalculator = {
+    // Configuration des constantes
+    NIGHT_START: 21, // 21h
+    NIGHT_END: 6,    // 06h
+
+    /**
+     * Calcule la répartition des heures pour un shift
+     * @param {Date} start - Date et heure de début
+     * @param {Date} end - Date et heure de fin
+     * @param {Array<string>} feries - Liste des dates fériées (format YYYY-MM-DD)
+     */
+    calculateDistribution(start, end, feries = []) {
+        const stats = {
+            heuresClassiques: 0,
+            heuresNuit: 0,
+            heuresDimanche: 0,
+            heuresFerie: 0,
+            total: 0
+        };
+
+        // On avance minute par minute (ou par tranche de 15min pour la performance)
+        let current = new Date(start);
+        const stepMinutes = 15; // Précision au quart d'heure
+        const stepDecimal = stepMinutes / 60;
+
+        while (current < end) {
+            const h = current.getHours();
+            const dateStr = current.toISOString().split('T')[0];
+            const isDimanche = current.getDay() === 0;
+            const isFerie = feries.includes(dateStr);
+            const isNuit = (h >= this.NIGHT_START || h < this.NIGHT_END);
+
+            // 1. Priorité aux majorations (cumulables ou non selon ta convention)
+            if (isFerie) {
+                stats.heuresFerie += stepDecimal;
+            } else if (isDimanche) {
+                stats.heuresDimanche += stepDecimal;
+            }
+
+            // 2. Calcul de la nuit (indépendant du jour)
+            if (isNuit) {
+                stats.heuresNuit += stepDecimal;
+            }
+
+            // 3. Heures normales (si ni férié ni dimanche)
+            if (!isFerie && !isDimanche && !isNuit) {
+                stats.heuresClassiques += stepDecimal;
+            }
+
+            stats.total += stepDecimal;
+            current.setMinutes(current.getMinutes() + stepMinutes);
+        }
+
+        return stats;
+    }
+};
+/**
+ * Calcule l'estimation financière basée sur la distribution des heures
+ */
+function estimateSalary(distribution, company) {
+    const { taux_horaire_brut, maj_nuit, maj_dimanche, maj_ferie } = company;
+
+    // Calcul des montants avec multiplicateurs
+    const totalBrut =
+        (distribution.heuresClassiques * taux_horaire_brut) +
+        (distribution.heuresNuit * taux_horaire_brut * (1 + (maj_nuit / 100))) +
+        (distribution.heuresDimanche * taux_horaire_brut * (1 + (maj_dimanche / 100))) +
+        (distribution.heuresFerie * taux_horaire_brut * (1 + (maj_ferie / 100)));
+
+    return {
+        brut: totalBrut.toFixed(2),
+        net: (totalBrut * 0.78).toFixed(2) // Estimation rapide net
+    };
+}
+/**
+ * Calcule le salaire brut et net basé sur la segmentation horaire
+ * @param {Object} stats - Objet contenant (heuresClassiques, heuresNuit, heuresDimanche, heuresFerie)
+ * @param {number} tauxHoraireBrut - Taux de base de l'entreprise
+ */
+function calculateSalaryBreakdown(stats, tauxHoraireBrut) {
+    // Définition des coefficients de majoration
+    const COEF_NUIT = 1.10;     // +10%
+    const COEF_DIMANCHE = 1.10; // +10%
+    const COEF_FERIE = 2.00;    // +100% (Heure de base + 100% de majoration)
+    const COEF_NET = 0.78;      // Conversion Brut -> Net
+
+    // Calcul du brut par catégorie
+    const brutClassique = stats.heuresClassiques * tauxHoraireBrut;
+    const brutNuit = stats.heuresNuit * tauxHoraireBrut * COEF_NUIT;
+    const brutDimanche = stats.heuresDimanche * tauxHoraireBrut * COEF_DIMANCHE;
+    const brutFerie = stats.heuresFerie * tauxHoraireBrut * COEF_FERIE;
+
+    const salaireBrutTotal = brutClassique + brutNuit + brutDimanche + brutFerie;
+    const salaireNetTotal = salaireBrutTotal * COEF_NET;
+
+    return {
+        brut: salaireBrutTotal.toFixed(2),
+        net: salaireNetTotal.toFixed(2),
+        details: {
+            classique: brutClassique.toFixed(2),
+            nuit: brutNuit.toFixed(2),
+            dimanche: brutDimanche.toFixed(2),
+            ferie: brutFerie.toFixed(2)
+        }
+    };
+}
+// Exemple de rendu dans ton composant React/Vue/Svelte
+const displaySalaryInfo = (result) => {
+    return `
+        ### Détails Financiers
+        * **Heures normales :** ${result.details.classique}€
+        * **Majoration Nuit (10%) :** ${result.details.nuit}€
+        * **Majoration Dimanche (10%) :** ${result.details.dimanche}€
+        * **Majoration Férié (100%) :** ${result.details.ferie}€
+        ---
+        * **TOTAL SALAIRE BRUT :** ${result.brut}€
+        * **TOTAL SALAIRE NET (0.78) :** ${result.net}€
+    `;
+};
+function formatTo24h(hoursText) {
+    if (!hoursText) return '';
+
+    const parts = hoursText.toLowerCase().split(/[-/]|(?:\s+à\s+)/);
+    if (parts.length < 2) return hoursText; // Retourne tel quel si pas de séparateur
+
+    const formatPart = (str) => {
+        const match = str.match(/(\d+)(?:[h:/\s](\d+))?/);
+        if (!match) return str;
+
+        let hours = match[1].padStart(2, '0');
+        let minutes = (match[2] || '00').padStart(2, '0');
+        return `${hours}h${minutes}`;
+    };
+
+    return `${formatPart(parts[0])}-${formatPart(parts[1])}`;
+}
+function getGridRowIndex(dateString) {
+    const date = new Date(dateString);
+    const day = date.getDay(); // 0 (Dimanche) à 6 (Samedi)
+    return day === 0 ? 7 : day; // Transforme 0 en 7, sinon garde le chiffre
+}

@@ -7,7 +7,7 @@ async function loadCompanies() {
         .order('nom', { ascending: true });
 
     if (!error) {
-        state.companies = data || []; // Mise à jour du cache
+        state.companies = data || [];
     }
 }
 
@@ -25,6 +25,8 @@ async function saveCompany(mode = 'pc') {
     const couleur = document.getElementById(idCol).value;
 
     if (!nom || !salaire) return alert("Champs obligatoires manquants");
+
+    const userId = (await _supabase.auth.getUser()).data.user?.id;
 
     const { error } = await _supabase
         .from('entreprises')
@@ -54,41 +56,47 @@ function renderCompaniesUI() {
     const editRowSelect = document.getElementById('editrow-company');
     const selectShift = document.getElementById('shift-company');
 
-    // 1. Préparation des templates (évite de toucher au DOM dans la boucle)
-    let htmlPC = '';
-    let htmlMob = '';
+    let htmlCommon = ''; 
     let optionsEditRow = '<option value="">-- Choisir une entreprise --</option><option value="repos">Repos</option>';
     let optionsShift = '<option value="Repos">-- Repos --</option>';
 
     state.companies.forEach(comp => {
         const net = (comp.taux_horaire_brut * 0.78).toFixed(2);
 
-        // Template PC
-        htmlPC += `
-            <div class="company-row-inline" style="border-left: 5px solid ${comp.couleur_hex}">
-                <div style="flex:1.5"><b>${comp.nom}</b></div>
-                <div style="flex:1">${net}€ Net</div>
-                <button class="btn-delete" onclick="deleteCompany('${comp.id}')">×</button>
-            </div>`;
+        htmlCommon += `
+        <div class="company-card" style="--company-color: ${comp.couleur_hex};">
+            <div class="company-color-bar"></div>
+            <div class="company-details">
+                <div class="company-main-info">
+                    <span class="company-name-text">${comp.nom}</span>
+                </div>
+                <span class="company-site-text">${net}€ Net / heure</span>
+            </div>
+            <div class="company-actions">
+                <button class="btn-delete" onclick="deleteCompany('${comp.id}')" title="Supprimer">×</button>
+            </div>
+        </div>`;   
 
-        // Template Mobile
-        htmlMob += `
-            <div class="mini-item">
-                <div class="mini-item-color" style="background:${comp.couleur_hex}"></div>
-                <div class="mini-item-info"><b>${comp.nom}</b><span>${net}€ Net</span></div>
-                <button onclick="deleteCompany('${comp.id}')">×</button>
-            </div>`;
-
-        // Construction des options de sélecteurs
         optionsEditRow += `<option value="${comp.id}">${comp.nom}</option>`;
         optionsShift += `<option value="🏢 ${comp.nom}">🏢 ${comp.nom}</option>`;
     });
 
-    // 2. Injection unique dans le DOM (Plus performant)
-    if (listPC) listPC.innerHTML = htmlPC;
-    if (listMob) listMob.innerHTML = htmlMob;
+    if (listPC) listPC.innerHTML = htmlCommon;
+    if (listMob) listMob.innerHTML = htmlCommon;
     if (editRowSelect) editRowSelect.innerHTML = optionsEditRow;
     if (selectShift) selectShift.innerHTML = optionsShift;
+}
+async function deleteCompany(id) {
 
-    // Le bloc "modalSelect" a été supprimé car il est obsolète.
+    const { error } = await _supabase
+        .from('entreprises')
+        .delete()
+        .eq('id', id);
+
+    if (!error) {
+        await loadCompanies(); 
+        renderCompaniesUI();
+    } else {
+        alert("Erreur lors de la suppression : " + error.message);
+    }
 }
