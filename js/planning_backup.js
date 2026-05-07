@@ -1,4 +1,5 @@
 /**
+ * planning_backup.js
  * État global du planning
  */
 const PlanningState = {
@@ -80,9 +81,7 @@ window.startPlanningCreation = async function() {
         PlanningState.currentPlanning = planningData;
         state.currentPlanning = planningData;
 
-        // Navigation vers la vue planning
-        document.getElementById('setup-planning-section')?.classList.add('hidden');
-        document.getElementById('planning-view')?.classList.remove('hidden');
+        showView('planning-view');
 
         // Mettre à jour le titre
         const titleEl = document.getElementById('current-planning-title');
@@ -152,6 +151,9 @@ async function generateCalendar() {
 /**
  * Organise les jours en semaines
  */
+/**
+ * Organise les jours en semaines
+ */
 function organizeDaysIntoWeeks(daysInMonth, month, year) {
     const weeks = [];
     let currentWeek = [];
@@ -159,12 +161,16 @@ function organizeDaysIntoWeeks(daysInMonth, month, year) {
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month - 1, day);
         const dayOfWeek = date.getDay(); // 0 = Dimanche, 6 = Samedi
-        
+
+        // CORRECTION : On cherche l'objet dans le tableau qui correspond au numéro du jour
+        const dayData = PlanningState.days.find(d => d.dayNumber === day);
+
         currentWeek.push({
             day: day,
             date: date,
             dayOfWeek: dayOfWeek,
-            shift: PlanningState.days[day] || null
+            // On récupère la propriété .shift de l'objet trouvé
+            shift: dayData ? dayData.shift : null
         });
 
         // Si c'est samedi (6) ou dernier jour du mois, terminer la semaine
@@ -272,9 +278,11 @@ async function loadShifts() {
             return;
         }
 
+        // On ajoute .select('*, company:companies(*)') pour être sûr d'avoir 
+        // les détails de l'entreprise pour l'affichage
         const { data: shifts, error } = await _supabase
             .from('shifts')
-            .select('*')
+            .select('*, company:companies(*)')
             .eq('planning_id', PlanningState.currentPlanning.id)
             .order('date_jour');
 
@@ -283,7 +291,7 @@ async function loadShifts() {
             return;
         }
 
-        // Mettre à jour l'état des jours
+        // 1. On initialise proprement les 31 jours
         PlanningState.days = [];
         for (let day = 1; day <= 31; day++) {
             PlanningState.days.push({
@@ -292,9 +300,13 @@ async function loadShifts() {
             });
         }
 
-        // Associer les shifts aux jours
+        // 2. Associer les shifts aux jours
         shifts?.forEach(shift => {
-            const day = new Date(shift.date_jour).getDate();
+            // Utilisation de split('-') pour éviter les problèmes de fuseau horaire
+            const day = parseInt(shift.date_jour.split('-')[2]);
+
+            // CORRECTION CRUCIALE : 
+            // On cherche l'objet qui a le bon dayNumber
             const dayData = PlanningState.days.find(d => d.dayNumber === day);
             if (dayData) {
                 dayData.shift = shift;
@@ -309,32 +321,41 @@ async function loadShifts() {
 /**
  * Met à jour les statistiques du planning
  */
+/**
+ * Met à jour les statistiques du planning
+ */
 function updateStats() {
     try {
         let totalHours = 0;
         let totalSalary = 0;
         let totalKm = 0;
 
+        // On parcourt ton tableau de 31 jours sans changer sa structure
         PlanningState.days.forEach(dayData => {
-            if (dayData.shift && dayData.shift.company) {
-                // Calculer les heures
-                if (dayData.shift.hours) {
-                    const hours = parseHours(dayData.shift.hours);
+            const shift = dayData.shift;
+
+            if (shift) {
+                // 1. Calcul des heures
+                if (shift.hours) {
+                    const hours = parseHours(shift.hours);
                     totalHours += hours;
-                    
-                    // Calculer le salaire
-                    const hourlyRate = parseFloat(dayData.shift.company.salary) || 0;
+
+                    // 2. Calcul du salaire
+                    // On cherche le taux horaire soit dans shift.company, soit dans la liste globale des entreprises
+                    const company = shift.company || PlanningState.companies.find(c => c.id === shift.company_id);
+                    const hourlyRate = parseFloat(company?.salary) || 0;
+
                     totalSalary += hours * hourlyRate;
                 }
-                
-                // Ajouter les kilomètres
-                if (dayData.shift.km) {
-                    totalKm += parseInt(dayData.shift.km) || 0;
+
+                // 3. Calcul des kilomètres
+                if (shift.km) {
+                    totalKm += parseInt(shift.km) || 0;
                 }
             }
         });
 
-        // Mettre à jour l'affichage
+        // Mise à jour de l'affichage (ton code original conservé)
         const hoursEl = document.getElementById('stat-hours');
         if (hoursEl) {
             hoursEl.textContent = `${totalHours.toFixed(1)}h`;
@@ -354,7 +375,6 @@ function updateStats() {
         console.error('Erreur updateStats:', error);
     }
 }
-
 /**
  * Parse les heures au format "19H00 - 07H00"
  */

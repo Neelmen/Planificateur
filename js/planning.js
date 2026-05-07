@@ -12,7 +12,8 @@ const PlanningState = {
 /**
  * Initialise le nouveau planning après le clic sur "Continuer"
  */
-window.startPlanningCreation = async function() {
+window.startPlanningCreation = async function () {
+
     try {
         const month = document.getElementById('setup-month-select')?.value;
         const year = document.getElementById('setup-year-select')?.value;
@@ -72,7 +73,6 @@ window.startPlanningCreation = async function() {
         PlanningState.currentPlanning = planningData;
         state.currentPlanning = planningData;
 
-        // Navigation vers la vue planning
         showView('planning-view');
 
         // Mettre à jour le titre
@@ -134,7 +134,7 @@ async function generateCalendar() {
         }
 
         // Charger les données existantes
-        await loadPlanningData();
+        
 
     } catch (error) {
         console.error('Erreur génération calendrier:', error);
@@ -740,22 +740,36 @@ window.saveDayModal = async function() {
 /**
  * Calcule et affiche les statistiques du planning
  */
+/**
+ * Calcule et affiche les statistiques du planning dans la barre d'infos Discord
+ */
 function updatePlanningStats() {
+    console.log("Mise à jour des statistiques du planning...");
+
     try {
+        // --- 1. INITIALISATION DES COMPTEURS ---
         let totalHours = 0;
         let totalKm = 0;
         let totalGrossSalary = 0;
         let workedDays = 0;
         let uniqueCompanies = new Set();
 
+        // --- 2. CALCULS VIA LES DONNÉES DU PLANNING ---
+        if (!PlanningState.days || PlanningState.days.length === 0) {
+            console.warn("Aucun jour trouvé dans PlanningState pour calculer les stats.");
+        }
+
         PlanningState.days.forEach(day => {
             const shift = day.shift;
+
+            // On ne calcule que si c'est une entreprise et pas un repos
             if (shift && shift.entreprise_id && shift.entreprise_id !== 'repos') {
-                // Heures
+
+                // Calcul du temps de travail
                 const hours = parseHoursText(shift.horaire_saisi || "0");
                 totalHours += hours;
 
-                // Entreprise & Salaire
+                // Identification de l'entreprise pour le salaire
                 const company = state.companies.find(c => String(c.id) === String(shift.entreprise_id));
                 if (company) {
                     uniqueCompanies.add(company.id);
@@ -764,37 +778,63 @@ function updatePlanningStats() {
                     }
                 }
 
-                // KM & Jours
+                // Kilométrage
                 totalKm += parseFloat(shift.km || 0);
+
+                // Incrément des jours travaillés
                 workedDays++;
             }
         });
 
-        // Conversion Brut -> Net (Ratio 0.77)
-        const totalNetSalary = totalGrossSalary * 0.77;
+        // --- 3. LOGIQUE FINANCIÈRE ET TEMPS ---
+        const totalNetSalary = totalGrossSalary * 0.77; // Ratio Brut -> Net
+        const totalDaysInMonth = PlanningState.days.length;
+        const restDays = totalDaysInMonth - workedDays;
 
-        // Mise à jour du DOM avec formatage intelligent
+        // --- 4. MISE À JOUR DU DOM (AFFICHAGE) ---
+
+        // HEURES (Formatage h/min)
         const hoursEl = document.getElementById('stat-hours');
-        const salaryEl = document.getElementById('stat-salary');
-        const kmEl = document.getElementById('stat-km');
-        const daysEl = document.getElementById('stat-days');
-        const companiesEl = document.getElementById('stat-companies');
-
         if (hoursEl) {
             const h = Math.floor(totalHours);
             const m = Math.round((totalHours - h) * 60);
             hoursEl.textContent = m > 0 ? `${h}h${m.toString().padStart(2, '0')}` : `${h}h`;
         }
 
+        // SALAIRE NET (Arrondi à l'euro supérieur)
+        const salaryEl = document.getElementById('stat-salary');
         if (salaryEl) {
             salaryEl.textContent = `${Math.ceil(totalNetSalary)}€`;
         }
-        if (kmEl) kmEl.textContent = `${totalKm} km`;
-        if (daysEl) daysEl.textContent = `${workedDays}/${PlanningState.days.length}`;
-        if (companiesEl) companiesEl.textContent = uniqueCompanies.size;
+
+        // KILOMÉTRAGE
+        const kmEl = document.getElementById('stat-km');
+        if (kmEl) {
+            kmEl.textContent = `${totalKm.toFixed(0)} km`;
+        }
+
+        // JOURS TRAVAILLÉS
+        const daysEl = document.getElementById('stat-days');
+        if (daysEl) {
+            daysEl.textContent = `${workedDays}/${totalDaysInMonth}`;
+        }
+
+        // JOURS DE REPOS (Nouvel élément)
+        const restEl = document.getElementById('stat-rest-days');
+        if (restEl) {
+            restEl.textContent = `${restDays}/${totalDaysInMonth}`;
+        }
+
+        // NOMBRE D'ENTREPRISES DIFFÉRENTES
+        const companiesEl = document.getElementById('stat-companies');
+        if (companiesEl) {
+            companiesEl.textContent = uniqueCompanies.size;
+        }
+
+        console.log(`Stats calculées : ${workedDays}j travaillés, ${restDays}j repos, ${totalHours}h totales.`);
 
     } catch (error) {
-        console.error('Erreur updatePlanningStats:', error);
+        console.error('Erreur critique dans updatePlanningStats:', error);
     }
 }
 
@@ -917,58 +957,39 @@ function displayRecentPlannings(plannings) {
 /**
  * Supprime le planning actuel et retourne au menu principal
  */
-window.deleteCurrentPlanning = async function() {
-    try {
-        if (!PlanningState.currentPlanning?.id) {
-            console.error('Aucun planning à supprimer');
-            return;
+window.deletePlanning = function () {
+    const planningId = PlanningState.currentPlanning?.id;
+    if (!planningId) return console.error('Aucun planning à supprimer');
+
+    const modal = document.getElementById('confirm-modal');
+    modal.classList.remove('hidden');
+
+    // On définit l'action du bouton de confirmation directement ici
+    document.getElementById('confirm-delete-btn').onclick = async () => {
+        try {
+            // 1. Suppression Shifts + Planning (Supabase gère souvent la cascade, sinon on fait les deux)
+            await _supabase.from('shifts').delete().eq('planning_id', planningId);
+            await _supabase.from('plannings').delete().eq('id', planningId);
+
+            // 2. Reset de l'état et interface
+            Object.assign(PlanningState, { currentPlanning: null, days: [] });
+            state.currentPlanning = null;
+
+            modal.classList.add('hidden'); // Ferme la modale
+            showView('menu-view');
+            await loadRecentPlannings();
+        } catch (err) {
+            alert('Erreur lors de la suppression');
         }
-
-        // Supprimer tous les shifts associés au planning
-        const { error: shiftsError } = await _supabase
-            .from('shifts')
-            .delete()
-            .eq('planning_id', PlanningState.currentPlanning.id);
-
-        if (shiftsError) {
-            console.error('Erreur suppression shifts:', shiftsError);
-        }
-
-        // Supprimer le planning lui-même
-        const { error: planningError } = await _supabase
-            .from('plannings')
-            .delete()
-            .eq('id', PlanningState.currentPlanning.id);
-
-        if (planningError) {
-            console.error('Erreur suppression planning:', planningError);
-            alert('Erreur lors de la suppression du planning');
-            return;
-        }
-
-        // Réinitialiser l'état
-        PlanningState.currentPlanning = null;
-        PlanningState.currentMonth = null;
-        PlanningState.currentYear = null;
-        PlanningState.days = [];
-        state.currentPlanning = null;
-
-        // Retourner au menu principal
-        showView('menu-view');
-        
-        // Recharger les plannings récents avec la bonne disposition
-        await loadRecentPlannings();
-
-    } catch (error) {
-        console.error('Erreur deleteCurrentPlanning:', error);
-        alert('Une erreur est survenue lors de la suppression');
-    }
+    };
 };
+
+window.closeConfirmModal = () => document.getElementById('confirm-modal').classList.add('hidden');
 
 /**
  * Réinitialise le planning actuel (supprime tous les shifts mais garde le planning)
  */
-window.resetCurrentPlanning = async function() {
+window.resetPlanning = async function() {
     try {
         if (!PlanningState.currentPlanning?.id) {
             console.error('Aucun planning à réinitialiser');
@@ -1223,15 +1244,6 @@ window.sharePlanning = function() {
     } catch (error) {
         console.error('Erreur sharePlanning:', error);
         alert('Une erreur est survenue lors du partage');
-    }
-};
-
-/**
- * Affiche la confirmation de suppression (remplace showDeleteConfirm)
- */
-window.showDeleteConfirm = function() {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce planning ? Cette action est irréversible.')) {
-        deleteCurrentPlanning();
     }
 };
 
