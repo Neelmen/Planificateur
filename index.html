@@ -124,8 +124,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div id="companies-list-desktop" class="companies-horizontal-list"></div>
             </div>
         </div>
 
@@ -176,8 +174,13 @@
                     </div>
                     <div class="info-separator">|</div>
                     <div class="info-item">
-                        <span class="info-label">📅 JOURS</span>
+                        <span class="info-label">📅 JOURS TRAVAILLÉS</span>
                         <span class="info-value" id="stat-days">0/0</span>
+                    </div>
+                    <div class="info-separator">|</div>
+                    <div class="info-item">
+                        <span class="info-label">📅 REPOS</span>
+                        <span class="info-value" id="stat-rest-days">0/0</span>
                     </div>
                     <div class="info-separator">|</div>
                     <div class="info-item">
@@ -189,19 +192,31 @@
 
             <!-- Conteneur pour le calendrier généré par planning.js -->
             <div id="calendar-container" class="calendar-grid"></div>
+            <div class="discord-floating-bar">
+                <div class="floating-bar-content">
+                    <div class="floating-bar-actions-center">
+                        <button class="action-btn-discord" onclick="sharePlanning()" title="Partager">
+                            <span class="icon">📤</span>
+                            <span class="label">Partager</span>
+                        </button>
 
-            <!-- Boutons flottants d'actions rapides -->
-            <div class="floating-actions">
-                <button class="floating-btn success" onclick="sharePlanning()" title="Partager">
-                    📤
-                </button>
-                <button class="floating-btn primary" onclick="resetCurrentPlanning()" title="Réinitialiser">
-                    🔄
-                </button>
-                <button class="floating-btn danger" onclick="showDeleteConfirm()" title="Supprimer">
-                    🗑️
-                </button>
+                        <div class="separator-v"></div>
+
+                        <button class="action-btn-discord" onclick="resetPlanning()" title="Réinitialiser">
+                            <span class="icon">🔄</span>
+                            <span class="label">Réinitialiser</span>
+                        </button>
+
+                        <div class="separator-v"></div>
+
+                        <button class="action-btn-discord danger" onclick="deletePlanning()" title="Supprimer">
+                            <span class="icon">🗑️</span>
+                            <span class="label">Supprimer</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 
@@ -212,7 +227,7 @@
                 <h3>Gestion des Entreprises</h3>
                 <button class="btn-close" onclick="toggleDrawer(false)">×</button>
             </div>
-            
+
             <div class="drawer-body">
                 <!-- Formulaire mobile pour ajouter une entreprise -->
                 <div class="mobile-form-section">
@@ -221,7 +236,7 @@
                         <label for="comp-name-m">NOM DE L'ENTREPRISE</label>
                         <input type="text" id="comp-name-m" required>
                     </div>
-                                        <div class="form-group">
+                    <div class="form-group">
                         <label for="comp-salary-m">TAUX HORAIRE BRUT (€)</label>
                         <input type="number" id="comp-salary-m" step="0.01" required>
                     </div>
@@ -240,9 +255,9 @@
                     </div>
                     <button type="button" class="btn-new" onclick="saveCompany('mobile')" style="width: 100%;">Enregistrer</button>
                 </div>
-                
+
                 <hr>
-                
+
                 <!-- Liste des entreprises mobile -->
                 <div>
                     <h4>Mes entreprises</h4>
@@ -251,11 +266,11 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Overlay pour le side-drawer -->
     <div id="drawer-overlay" class="drawer-overlay hidden" onclick="toggleDrawer(false)"></div>
 
-    
+
     <!-- MENU EditRow - STYLE DISCORD -->
     <div id="editrow-menu" class="editrow-menu hidden">
         <div class="editrow-backdrop" onclick="closeEditRow()"></div>
@@ -284,8 +299,7 @@
                                class="editrow-input"
                                placeholder="ENTREZ UN SITE"
                                list="site-suggestions"
-                               oninput="this.value = this.value.toUpperCase()"
-                        >                        
+                               oninput="this.value = this.value.toUpperCase()">
                         <datalist id="site-suggestions">
                         </datalist>
                     </div>
@@ -337,7 +351,7 @@
     <script src="js/planning.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
-<!-- Datalist pour suggestions de sites -->
+    <!-- Datalist pour suggestions de sites -->
     <datalist id="site-suggestions">
         <option value="Paris Centre">
         <option value="Paris La Défense">
@@ -350,6 +364,22 @@
         <option value="Bordeaux Centre">
         <option value="Lille Grand'Place">
     </datalist>
+    <!-- ALERT CONFIRM DELETE PLANNING -->
+    <div id="confirm-modal" class="discord-modal hidden">
+        <div class="discord-modal-backdrop" onclick="closeConfirmModal()"></div>
+        <div class="discord-modal-content confirm-card">
+            <div class="discord-modal-header">
+                <h3>Confirmer la suppression</h3>
+            </div>
+            <div class="discord-modal-body">
+                <p>Supprimer ce planning définitivement ?</p>
+            </div>
+            <div class="discord-modal-footer">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Annuler</button>
+                <button id="confirm-delete-btn" class="btn-danger-confirm">Supprimer</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>

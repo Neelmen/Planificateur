@@ -412,10 +412,6 @@ padding: 12px;
 background: var(--bg-darker);
 border-radius: 8px;
 transition: all 0.2s;
-    padding: 12px;
-    background: var(--bg-darker);
-    border-radius: 8px;
-    transition: all 0.2s;
 }
 
 .mini-item:hover {
@@ -483,10 +479,6 @@ transition: all 0.2s;
     align-items: center;
     justify-content: center;
     animation: fadeIn 0.2s ease;
-}
-
-.hidden {
-    display: none !important;
 }
 
 /* --- EditRow Menu Styles --- */
@@ -1000,6 +992,7 @@ transition: all 0.2s;
         flex-wrap: nowrap !important;
         gap: 8px;
         padding: 10px 20px;
+        padding-bottom: 20px;
         width: 100% !important;
         height: calc(100vh - 280px);
         min-height: 500px;
@@ -1139,36 +1132,21 @@ transition: all 0.2s;
     display: flex; /* Afficher le bouton retour dans le planning */
 }
 
-@media (min-width: 769px) {
-    #btn-add-mobile {
-        display: none; /* Cacher le bouton mobile sur desktop */
-    }
-    
-    .side-drawer {
-        width: 400px;
-    }
-}
-
-/* 6. PLANNING horizontale */
-.calendar-list {
-    padding: 50px 10px 10px 10px;
-    max-width: 100%;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
 /* Bloc d'informations Discord - forme de ligne */
 .discord-info-bar {
     background: linear-gradient(135deg, #2f3136, #36393f);
     border: 2px solid #40444b;
     border-radius: 12px;
     margin: 10px 15px;
-    padding: 0;
+    padding: 12px 20px; /* Ajout d'un padding interne pour que les bords respirent */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     overflow: hidden;
     transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: auto;
+    height: 60px;
 }
 
 .discord-info-bar:hover {
@@ -1180,9 +1158,9 @@ transition: all 0.2s;
 .info-bar-content {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: 12px 20px;
-    gap: 8px;
+    gap: 40px;
     flex-wrap: nowrap;
     overflow-x: auto;
 }
@@ -1196,7 +1174,7 @@ transition: all 0.2s;
 }
 
 .info-label {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     color: #b9bbbe;
     text-transform: uppercase;
@@ -1206,7 +1184,7 @@ transition: all 0.2s;
 }
 
 .info-value {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #ffffff;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -1214,7 +1192,7 @@ transition: all 0.2s;
 }
 
 .info-separator {
-    color: #5865f2;
+    color: #4f545c;
     font-size: 16px;
     font-weight: 700;
     margin: 0 4px;
@@ -1297,19 +1275,6 @@ div.day-row.grid-layout:hover {
     grid-row: 1;
     color: #dcddde;
     font-weight: 600;
-}
-
-.cell-3 {
-    grid-column: 3;
-    grid-row: 1;
-    color: #b9bbbe;
-}
-
-.cell-4 {
-    grid-column: 4;
-    grid-row: 1;
-    color: #b9bbbe;
-    justify-content: flex-end;
 }
 
 /*FORMATAGE CELLULE 2*/
@@ -1969,26 +1934,7 @@ input[type=number] {
     z-index: 1000; /* Passe au dessus de tout */
 }
 
-/* Style des boutons à l'intérieur */
-.btn-tool-float {
-    background: var(--bg-card);
-    border: none;
-    font-size: 1.5rem; /* Taille des emojis */
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border-radius: 50%; /* Boutons bien ronds */
-    transition: all 0.2s ease;
-}
 
-    /* Effets au survol */
-    .btn-tool-float:hover {
-        background: var(--bg-light);
-        transform: scale(1.1); /* Grossit légèrement */
-    }
 
 /* Couleur spéciale pour le bouton supprimer au survol */
 .btn-danger-float:hover {
@@ -2299,4 +2245,136 @@ input:checked + .ios-slider {
     display: flex;
     align-items: center;
     padding-right: 20px;
+}
+
+/* --- BARRE FLOTTANTE STYLE DISCORD --- */
+.discord-floating-bar {
+    position: fixed;
+    bottom: 24px;
+    margin-top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    border-radius: 50px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    border: 0px solid rgba(255, 255, 255, 0.05);
+    min-height: 40px; /* Force la barre à exister visuellement même sans texte */
+}
+    .discord-floating-bar:hover {
+        /* Bord bleu épais (2px) qui s'allume */
+        border: 2px solid var(--blurple) !important;
+        /* Ombre de la même couleur (Blurple) avec 20% d'opacité */
+        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
+        /* Optionnel : transition fluide si elle n'est pas déjà sur l'élément parent */
+        transition: all 0.3s ease;
+    }
+
+.floating-bar-actions-center {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+/*BOUTONS TOOLBAR*/
+.action-btn-discord {
+    background: var(--blurple);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+    .action-btn-discord:hover {
+        background-color: var(--blurple);
+        color: white;
+        transform: scale(1.1)
+    }
+    /*BOUTON SUPPRIMER*/
+    .action-btn-discord.danger {
+        background: var(--danger);
+        color: white;
+    }
+        .action-btn-discord.danger:hover {
+            background-color: var(--danger);
+            color: white;
+            transform: scale(1.1)
+        }
+
+/* Cache le texte sur mobile pour ne garder que les icônes */
+@media (max-width: 600px) {
+    .action-btn-discord .label {
+        display: none;
+    }
+}
+/* Force la zone de configuration à disparaître complètement */
+#setup-view:empty, .hidden {
+    display: none !important;
+}
+
+/* Assure-toi que le container du planning démarre bien en haut */
+#planning-view {
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+}
+/* STYLE CONFIRME DELETE PLANNING */
+.confirm-card {
+    max-width: 400px !important;
+    text-align: left;
+}
+
+.discord-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px;
+    background: #2b2d31; /* Un peu plus sombre pour le bas */
+    border-radius: 0 0 8px 8px;
+}
+
+.btn-cancel {
+    background: transparent;
+    color: var(--text-main);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+    .btn-cancel:hover {
+        text-decoration: underline;
+    }
+
+.btn-danger-confirm {
+    background-color: var(--danger);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+    .btn-danger-confirm:hover {
+        background-color: #a12d2f;
+    }
+/* Force la zone de configuration à disparaître complètement */
+#setup-planning-view:empty, .hidden {
+    display: none !important;
+}
+
+/* Assure-toi que le container du planning démarre bien en haut */
+#planning-view {
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
 }
