@@ -12,7 +12,7 @@
 
     <!-- PAGE DE CONNEXION -->
     <div id="login-page" class="auth-container">
-        <form id="login-form" class="auth-card" onsubmit="event.preventDefault(); handleLogin();">
+        <form id="login-form" class="card-layout" onsubmit="event.preventDefault(); handleLogin();">
             <h2>Bienvenue !</h2>
             <p class="subtitle">Connectez-vous pour gérer vos plannings</p>
             <div class="form-group">
@@ -97,7 +97,7 @@
 
                 <!-- Formulaire PC pour ajouter une entreprise -->
                 <div id="form-container-pc" class="hidden" style="margin-bottom: 20px;">
-                    <div class="auth-card">
+                    <div class="card-layout">
                         <h3 style="margin-top: 0;">Nouvelle Entreprise</h3>
                         <div class="form-group">
                             <label for="pc-comp-name">NOM DE L'ENTREPRISE</label>
@@ -130,7 +130,7 @@
         <!-- VUE : CONFIGURATION NOUVEAU PLANNING -->
         <div id="setup-planning-view" class="content-view hidden">
             <div class="flex-center-container">
-                <div class="auth-card" id="setup-planning-section" style="max-width: 400px; width: 100%;">
+                <div class="card-layout" id="setup-planning-section" style="max-width: 400px; width: 100%;">
                     <h2>Choisissez la période</h2>
                     <div class="form-group">
                         <label>MOIS</label>
@@ -151,43 +151,51 @@
 
         <!-- VUE : ÉDITEUR DE PLANNING -->
         <div id="planning-view" class="content-view hidden">
+
             <div class="planning-header">
                 <h2 id="current-planning-title">PLANNING</h2>
             </div>
 
-            <!-- Bloc d'informations complémentaires style Discord -->
-            <div class="discord-info-bar">
-                <div class="info-bar-content">
-                    <div class="info-item">
-                        <span class="info-label">⏱️ HEURES</span>
-                        <span class="info-value" id="stat-hours">0h</span>
-                    </div>
-                    <div class="info-separator">|</div>
-                    <div class="info-item">
-                        <span class="info-label">💰 SALAIRE</span>
-                        <span class="info-value" id="stat-salary">0€</span>
-                    </div>
-                    <div class="info-separator">|</div>
-                    <div class="info-item">
-                        <span class="info-label">🚗 KM</span>
-                        <span class="info-value" id="stat-km">0 km</span>
-                    </div>
-                    <div class="info-separator">|</div>
-                    <div class="info-item">
-                        <span class="info-label">📅 JOURS TRAVAILLÉS</span>
-                        <span class="info-value" id="stat-days">0/0</span>
-                    </div>
-                    <div class="info-separator">|</div>
-                    <div class="info-item">
-                        <span class="info-label">📅 REPOS</span>
-                        <span class="info-value" id="stat-rest-days">0/0</span>
-                    </div>
-                    <div class="info-separator">|</div>
-                    <div class="info-item">
-                        <span class="info-label">🏢 ENTREPRISES</span>
-                        <span class="info-value" id="stat-companies">0</span>
+            <div id="capture-area" class="planning-capture-zone">
+
+                <div class="discord-info-bar">
+                    <div class="info-bar-content">
+                        <div class="info-item">
+                            <span class="info-label">⏱️ HEURES</span>
+                            <span class="info-value" id="stat-hours">0h</span>
+                        </div>
+                        <div class="info-separator">|</div>
+                        <div class="info-item">
+                            <span class="info-label">💰 SALAIRE</span>
+                            <span class="info-value" id="stat-salary">0€</span>
+                        </div>
+                        <div class="info-separator">|</div>
+                        <div class="info-item">
+                            <span class="info-label">🚗 KM</span>
+                            <span class="info-value" id="stat-km">0 km</span>
+                        </div>
+                        <div class="info-separator">|</div>
+                        <div class="info-item">
+                            <span class="info-label">📅 JOURS TRAVAILLÉS</span>
+                            <span class="info-value" id="stat-days">0/0</span>
+                        </div>
+                        <div class="info-separator">|</div>
+                        <div class="info-item">
+                            <span class="info-label">📅 REPOS</span>
+                            <span class="info-value" id="stat-rest-days">0/0</span>
+                        </div>
+                        <div class="info-separator">|</div>
+                        <div class="info-item">
+                            <span class="info-label">🏢 ENTREPRISES</span>
+                            <span class="info-value" id="stat-companies">0</span>
+                        </div>
                     </div>
                 </div>
+
+                <div id="calendar-container" class="calendar-grid"></div>
+
+
+
             </div>
 
             <!-- Conteneur pour le calendrier généré par planning.js -->
@@ -342,7 +350,8 @@
             </div>
         </div>
     </div>
-
+    <!-- CANVA -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- SCRIPTS MODULAIRES -->
     <script src="js/config.js"></script>
     <script src="js/ui.js"></script>
@@ -380,6 +389,13 @@
             </div>
         </div>
     </div>
+    <!-- CUSTOM clic droit -->
 
+    <div id="custom-context-menu" class="context-menu hidden">
+        <button onclick="copyCurrentRow()">Copier</button>
+        <button onclick="pasteToCurrentRow()">Coller</button>
+        <div class="separator"></div>
+        <button class="danger" onclick="clearCurrentRow()">Effacer</button>
+    </div>
 </body>
 </html>
