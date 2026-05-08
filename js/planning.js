@@ -8,6 +8,8 @@ const PlanningState = {
     companies: [],
     isLoading: false
 };
+let internalClipboard = null; // Cache pour les données du shift
+let hoveredDayNum = null;    // Jour actuellement survolé
 
 /**
  * Initialise le nouveau planning après le clic sur "Continuer"
@@ -284,6 +286,10 @@ function createCompactDayRow(dayData) {
     const dayRow = document.createElement('div');
     dayRow.className = 'day-row grid-layout';
     dayRow.setAttribute('data-day', dayData.day);
+
+    // Détecter quelle ligne est survolée pour le Ctrl+C / Ctrl+V
+    dayRow.addEventListener('mouseenter', () => hoveredDayNum = dayData.day);
+    dayRow.addEventListener('mouseleave', () => hoveredDayNum = null);
 
     if (dayData.dayOfWeek === 5 || dayData.dayOfWeek === 6) {
         dayRow.classList.add('weekend');
@@ -1217,35 +1223,60 @@ window.backToMainMenu = function() {
 /**
  * Partage le planning actuel
  */
-window.sharePlanning = function() {
-    try {
-        if (!PlanningState.currentPlanning) {
-            alert('Aucun planning à partager');
-            return;
-        }
+// js/planning.js
 
-        // Créer un lien de partage (URL actuelle avec ID du planning)
-        const shareUrl = `${window.location.origin}${window.location.pathname}?planning=${PlanningState.currentPlanning.id}`;
-        
-        // Copier dans le presse-papiers
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                alert('Lien de planning copié dans le presse-papiers !\n\n' + shareUrl);
-            }).catch(err => {
-                console.error('Erreur copie:', err);
-                // Fallback si clipboard ne fonctionne pas
-                prompt('Copiez ce lien pour partager votre planning:', shareUrl);
-            });
-        } else {
-            // Fallback pour anciens navigateurs
-            prompt('Copiez ce lien pour partager votre planning:', shareUrl);
-        }
+async function sharePlanning() {
+    const captureArea = document.getElementById('capture-area');
+    const title = document.getElementById('current-planning-title').innerText;
+
+    if (!captureArea) {
+        alert("Erreur : Impossible de trouver la zone de capture.");
+        return;
+    }
+
+    // Afficher un indicateur de chargement (optionnel mais recommandé)
+    const shareBtn = document.querySelector('.action-btn-discord[onclick="sharePlanning()"]');
+    const originalText = shareBtn.innerHTML;
+    shareBtn.innerHTML = '<span class="icon">⌛</span><span class="label">Génération...</span>';
+    shareBtn.style.opacity = '0.7';
+
+    try {
+        // 1. html2canvas prend une capture de la zone
+        const canvas = await html2canvas(captureArea, {
+            backgroundColor: '#36393f', // Force le fond Discord
+            scale: 2, // Augmente la qualité pour les écrans Retina
+            logging: false,
+            useCORS: true, // Nécessaire si tu as des images externes (ex: photos de profil)
+        });
+
+        // 2. Convertir le canvas en Blob .webp
+        canvas.toBlob(async (blob) => {
+            if (!blob) {
+                alert("Erreur lors de la génération de l'image.");
+                return;
+            }
+
+            // 3. Préparer le fichier pour le partage
+            const fileName = `${title.replace(/ /g, '_')}.webp`;
+            const file = new File([blob], fileName, { type: 'image/webp' });
+
+                // FALLBACK : Télécharger l'image (pour PC)
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.click();
+                showDiscordToast("Image téléchargée !", '.action-btn-discord[onclick="sharePlanning()"]');
+            }, 'image/webp', 0.99); // Qualité de 99%
 
     } catch (error) {
-        console.error('Erreur sharePlanning:', error);
-        alert('Une erreur est survenue lors du partage');
+        console.error("Erreur lors de la capture :", error);
+        alert("Désolé, une erreur est survenue lors de la création de l'image.");
+    } finally {
+        // Restaurer le bouton
+        shareBtn.innerHTML = originalText;
+        shareBtn.style.opacity = '1';
     }
-};
+}
 
 /**
  * Bascule l'affichage de la liste des plannings
@@ -1585,3 +1616,216 @@ function getGridRowIndex(dateString) {
     const day = date.getDay(); // 0 (Dimanche) à 6 (Samedi)
     return day === 0 ? 7 : day; // Transforme 0 en 7, sinon garde le chiffre
 }
+function showDiscordToast(message, targetSelector) {
+    const target = document.querySelector(targetSelector);
+    if (!target) return;
+
+    // Créer la bulle
+    const toast = document.createElement('div');
+    toast.className = 'discord-toast';
+    toast.innerText = message;
+
+    // L'ajouter au parent du bouton pour qu'elle soit bien positionnée
+    target.parentElement.style.position = 'relative';
+    target.parentElement.appendChild(toast);
+
+    // Supprimer après 3 secondes
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => toast.remove(), 200);
+    }, 3000);
+}
+
+let copiedRowData = null; // Notre "presse-papier" interne
+let focusedRowId = null;  // Pour savoir quelle ligne est survolée/cliquée
+
+// 1. Gérer le clic droit sur les lignes
+document.addEventListener('contextmenu', (e) => {
+    const row = e.target.closest('.day-row');
+    if (row) {
+        e.preventDefault();
+        focusedRowId = row.dataset.id; // On stocke l'ID de la ligne
+
+        const menu = document.getElementById('custom-context-menu');
+        menu.style.top = `${e.clientY}px`;
+        menu.style.left = `${e.clientX}px`;
+        menu.classList.remove('hidden');
+    } else {
+        document.getElementById('custom-context-menu').classList.add('hidden');
+    }
+});
+
+// 2. Cacher le menu si on clique ailleurs
+document.addEventListener('click', () => {
+    document.getElementById('custom-context-menu').classList.add('hidden');
+});
+
+// 3. Gérer les raccourcis clavier (Ctrl+C, Ctrl+V)
+document.addEventListener('keydown', (e) => {
+    // Si on n'est pas sur une ligne, on ne fait rien
+    if (!focusedRowId) return;
+
+    if (e.ctrlKey && e.key === 'c') {
+        e.preventDefault();
+        copyRowData(focusedRowId);
+    }
+    if (e.ctrlKey && e.key === 'v') {
+        e.preventDefault();
+        pasteRowData(focusedRowId);
+    }
+});
+
+// --- FONCTIONS LOGIQUES ---
+function copyRowData(rowId) {
+    // On cherche les données dans ton PlanningState.days
+    const dayData = PlanningState.days.find(d => d.id == rowId);
+    if (dayData) {
+        copiedRowData = { ...dayData }; // Copie superficielle
+        delete copiedRowData.id;       // On ne copie pas l'ID unique
+        delete copiedRowData.date;     // On ne copie pas la date
+        console.log("Données copiées :", copiedRowData);
+    }
+}
+
+async function pasteRowData(rowId) {
+    if (!copiedRowData) return;
+
+    // On met à jour l'objet dans ton état local
+    const dayIndex = PlanningState.days.findIndex(d => d.id == rowId);
+    if (dayIndex !== -1) {
+        // On fusionne les données copiées sur la ligne actuelle
+        PlanningState.days[dayIndex] = {
+            ...PlanningState.days[dayIndex],
+            ...copiedRowData
+        };
+
+        // Appeler ta fonction de rendu pour mettre à jour l'affichage
+        renderPlanning();
+
+        // Optionnel : Sauvegarder automatiquement sur Supabase
+        // await saveDayToSupabase(PlanningState.days[dayIndex]);
+    }
+}
+/** * LOGIQUE DE GESTION DU CLAVIER ET CLIC DROIT
+ */
+document.addEventListener('keydown', async (e) => {
+    // Si la souris n'est pas sur une ligne, on ignore
+    if (!hoveredDayNum) return;
+
+    // --- CTRL + C (COPIER) ---
+    if (e.ctrlKey && e.key === 'c') {
+        e.preventDefault();
+        const dayData = PlanningState.days.find(d => d.day === hoveredDayNum);
+
+        if (dayData && dayData.shift) {
+            // CRUCIAL : On crée un NOUVEL objet sans l'ID d'origine
+            // pour ne pas perturber les futures sauvegardes (UPSERT)
+            internalClipboard = {
+                entreprise_id: dayData.shift.entreprise_id,
+                horaire_saisi: dayData.shift.horaire_saisi,
+                site: dayData.shift.site,
+                km: dayData.shift.km,
+                is_night: dayData.shift.is_night
+            };
+
+            console.log(`📋 Copie réussie (Jour ${hoveredDayNum}) :`, internalClipboard);
+
+            // Optionnel : un petit effet visuel pour confirmer la copie
+            const row = document.querySelector(`[data-day="${hoveredDayNum}"]`);
+            row.style.opacity = "0.5";
+            setTimeout(() => row.style.opacity = "1", 200);
+        }
+    }
+
+    // --- CTRL + V (COLLER) ---
+    if (e.ctrlKey && e.key === 'v') {
+        e.preventDefault();
+        if (!internalClipboard) return;
+
+        console.log(`📥 Collage sur Jour ${hoveredDayNum}...`);
+        await pasteToDay(hoveredDayNum);
+    }
+
+    // --- DELETE / BACKSPACE (EFFACER) ---
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+        const dayData = PlanningState.days.find(d => d.day === hoveredDayNum);
+        if (dayData && dayData.shift) {
+            if (confirm(`Effacer le contenu du jour ${hoveredDayNum} ?`)) {
+                await clearDay(hoveredDayNum);
+            }
+        }
+    }
+});
+
+/**
+ * Fonction pour coller les données et synchroniser avec Supabase
+ */
+async function pasteToDay(dayNumber) {
+    const dayData = PlanningState.days.find(d => d.day === dayNumber);
+    if (!dayData || !PlanningState.currentPlanning) return;
+
+    const dateISO = `${PlanningState.currentYear}-${String(PlanningState.currentMonth).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+
+    // On prépare l'objet pour l'UPSERT (mise à jour ou création)
+    const shiftToSave = {
+        ...internalClipboard,
+        planning_id: PlanningState.currentPlanning.id,
+        user_id: state.user.id,
+        date_jour: dateISO,
+        is_ferie: false
+    };
+
+    // Si la cible a déjà un ID, on le garde pour écraser la ligne existante
+    if (dayData.shift && dayData.shift.id) {
+        shiftToSave.id = dayData.shift.id;
+    }
+
+    try {
+        const { data, error } = await _supabase
+            .from('shifts')
+            .upsert(shiftToSave)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Mise à jour locale et visuelle
+        dayData.shift = data;
+        updateDayDisplayNew(dayData);
+        updatePlanningStats();
+
+    } catch (err) {
+        console.error("Erreur collage:", err);
+    }
+}
+
+/**
+ * Fonction pour effacer un jour
+ */
+async function clearDay(dayNumber) {
+    const dayData = PlanningState.days.find(d => d.day === dayNumber);
+    if (!dayData || !dayData.shift?.id) return;
+
+    try {
+        const { error } = await _supabase
+            .from('shifts')
+            .delete()
+            .eq('id', dayData.shift.id);
+
+        if (error) throw error;
+
+        dayData.shift = null;
+        updateDayDisplayNew(dayData);
+        updatePlanningStats();
+    } catch (err) {
+        console.error("Erreur effacement:", err);
+    }
+}
+
+// Bloquer le clic droit navigateur sur le planning pour préparer ton futur menu
+document.getElementById('calendar-container').addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.day-row')) {
+        e.preventDefault();
+        // C'est ici qu'on affichera ta div "liste de boutons" plus tard
+    }
+});

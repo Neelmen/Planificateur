@@ -49,7 +49,7 @@ window.onload = async () => {
     
     if (!hasSession) {
         // Pas de session, afficher la page de login
-        document.getElementById('login-page').style.display = 'block';
+        document.getElementById('login-page').style.display = 'flex';
         document.getElementById('dashboard-page').classList.add('hidden');
     }
     

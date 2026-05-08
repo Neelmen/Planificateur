@@ -22,25 +22,31 @@ function toggleCompanyFormPC(show) {
         btn.classList.remove('hidden');
     }
 }
-
 function showView(viewId) {
+    // 1. On cache toutes les vues
     document.querySelectorAll('.content-view').forEach(v => v.classList.add('hidden'));
-    document.getElementById(viewId).classList.remove('hidden');
 
-    // Titre de la barre de navigation
-    const titles = { 'menu-view': 'Menu', 'planning-view': 'Éditeur', 'setup-planning-view': 'Nouveau' };
+    // 2. On affiche la vue demandée
+    const targetView = document.getElementById(viewId);
+    if (targetView) targetView.classList.remove('hidden');
+
+    // 3. Mise à jour du titre
+    const titles = {
+        'menu-view': 'Menu',
+        'planning-view': 'Éditeur',
+        'setup-planning-view': 'Nouveau'
+    };
     document.getElementById('nav-page-title').innerText = titles[viewId] || 'Planning Pro';
-    
-    // Gérer la visibilité du bouton retour
+
+    // 4. Gestion du bouton retour
     const backBtn = document.querySelector('.btn-icon');
     if (backBtn) {
-        // Cacher le bouton retour dans le menu principal
         if (viewId === 'menu-view') {
+            // Force la disparition totale immédiate
             backBtn.style.display = 'none';
         } else {
             backBtn.style.display = 'flex';
-            // Mettre à jour l'onclick pour utiliser backToMainMenu
-            backBtn.onclick = backToMainMenu;
+            backBtn.onclick = () => showView('menu-view'); // Utilise showView directement
         }
     }
 }
