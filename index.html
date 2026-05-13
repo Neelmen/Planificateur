@@ -45,6 +45,44 @@
             </div>
         </nav>
 
+        <!-- BOUTON POUR AFFICHER SIDEBAR GESTION D'ENTREPRISE' -->
+        <button id="companies-float-btn" class="companies-float-btn" onclick="toggleCompaniesSidebar()">🏢</button>
+        <!-- Fenêtre latérale pour la gestion des entreprises -->
+        <div id="companies-sidebar" class="companies-sidebar">
+            <div class="companies-sidebar-content">
+                <div class="companies-sidebar-header">
+                    <h3>Gestion des Entreprises</h3>
+                    <button class="companies-sidebar-close" onclick="toggleCompaniesSidebar()">×</button>
+                </div>
+
+                <div class="companies-sidebar-body">
+                    <!-- Formulaire d'ajout -->
+                    <div class="companies-form-section">
+                        <h4>Ajouter une entreprise</h4>
+                        <div class="companies-form">
+                            <input type="text" id="sidebar-comp-name" placeholder="Nom de l'entreprise" class="companies-input" oninput="this.value = this.value.toUpperCase()">
+                            <input type="number" id="sidebar-comp-salary" placeholder="Salaire brut/heure" class="companies-input">
+                            <select id="sidebar-comp-type" class="companies-select">
+                                <option value="CDI">CDI</option>
+                                <option value="CDD">CDD</option>
+                                <option value="INTERIM">INTERIM</option>
+                            </select>
+                            <input type="color" id="sidebar-comp-color" value="#5865f2" class="companies-color">
+                            <button onclick="saveCompanySidebar()" class="companies-btn-add">+ Ajouter</button>
+                        </div>
+                    </div>
+
+                    <!-- Liste des entreprises -->
+                    <div class="companies-list-section">
+                        <h4>Mes entreprises</h4>
+                        <div id="companies-sidebar-list" class="companies-list">
+                            <!-- Les entreprises seront chargées ici -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- VUE : MENU PRINCIPAL -->
         <div id="menu-view" class="content-view">
             <section class="mosaic-container">
@@ -84,47 +122,6 @@
                 </button>
             </div>
 
-            <hr class="separator">
-
-            <div id="companies-manager-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="margin: 0; font-size: 1.2rem;">Gestion des Entreprises</h2>
-                    <button id="btn-show-form-pc" class="btn-secondary" onclick="toggleCompanyFormPC(true)">+ Ajouter une entreprise</button>
-                </div>
-
-                <div id="companies-list-desktop" class="companies-horizontal-list">
-                </div>
-
-                <!-- Formulaire PC pour ajouter une entreprise -->
-                <div id="form-container-pc" class="hidden" style="margin-bottom: 20px;">
-                    <div class="card-layout">
-                        <h3 style="margin-top: 0;">Nouvelle Entreprise</h3>
-                        <div class="form-group">
-                            <label for="pc-comp-name">NOM DE L'ENTREPRISE</label>
-                            <input type="text" id="pc-comp-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pc-comp-salary">TAUX HORAIRE BRUT (€)</label>
-                            <input type="number" id="pc-comp-salary" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pc-comp-type">TYPE DE CONTRAT</label>
-                            <select id="pc-comp-type" class="custom-select">
-                                <option value="CDI">CDI</option>
-                                <option value="CDD">CDD</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="pc-comp-color">COULEUR</label>
-                            <input type="color" id="pc-comp-color" value="#5865f2">
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button type="button" class="btn-secondary" onclick="toggleCompanyFormPC(false)" style="flex: 1;">Annuler</button>
-                            <button type="button" class="btn-new" onclick="saveCompany('pc')" style="flex: 2;">Enregistrer</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- VUE : CONFIGURATION NOUVEAU PLANNING -->
@@ -397,5 +394,6 @@
         <div class="separator"></div>
         <button class="danger" onclick="clearCurrentRow()">Effacer</button>
     </div>
+
 </body>
 </html>

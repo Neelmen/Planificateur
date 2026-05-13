@@ -14,8 +14,10 @@
     --blurple-hover: #4752c4;
     --success: #23a559; /* Vert succès */
     --danger: #fa777c; /* Rouge/Rose alertes */
+    --danger-hover: #FF3B43; /* Rouge/Rose alertes */
     --warning: #f0b232; /* Jaune stats/horaires */
     --bg-weekend: #232428; /* Une couleur plus sombre que le #313338 classique */
+    --orange: #D17300;
 }
 
 * {
@@ -131,6 +133,7 @@ body {
     margin: 20px 0;
     flex-wrap: wrap;
 }
+
 
 .planning-box {
     flex: 1;
@@ -1019,12 +1022,12 @@ transition: all 0.2s;
         gap: 10px;
         margin-bottom: 20px;
     }
-    
-    .week-block:hover {
-        border-color: #5865f2;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
-    }
+
+        .week-block:hover {
+            border-color: #4752c4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
+        }
     
     .week-header {
         background: linear-gradient(135deg, #5865f2, #4752c4);
@@ -1144,12 +1147,6 @@ transition: all 0.2s;
     align-items: center;
     width: auto;
     height: 60px;
-}
-
-.discord-info-bar:hover {
-    border-color: #5865f2;
-    box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
-    transform: translateY(-1px);
 }
 
 .info-bar-content {
@@ -1498,18 +1495,7 @@ input, select {
     font-weight: bold;
 }
 
-.btn-logout-top {
-    background: #da373c;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* Couleurs selon le switch jour/nuit - Identique pour JOUR et NUIT */
-.grid-cell.cell-2.day-mode,
-.grid-cell.cell-2.night-mode {
+    .grid-cell.cell-2.day-mode, .grid-cell.cell-2.night-mode {
     color: var(--warning) !important; /* Orange pour les deux modes - Entreprise */
 }
 
@@ -1765,7 +1751,7 @@ input[type=number] {
 
 .btn-logout {
     background: var(--danger);
-    color: white;
+    color: var(--text-main);
     border: none;
     padding: 6px 12px;
     border-radius: 5px;
@@ -1773,9 +1759,13 @@ input[type=number] {
     font-weight: bold;
     cursor: pointer;
 }
+.btn-logout:hover {
+    background-color: var(--danger-hover);
+    color: var(--text-main)
 
-/*TOOL BAR*/
-.toolbar {
+}
+    /*TOOL BAR*/
+    .toolbar {
     display: flex;
     align-items: center;
     background: var(--bg-darker);
@@ -2179,7 +2169,242 @@ input:checked + .ios-slider {
         transform: scale(0.95); /* Effet de pression */
     }
 
-/* --- GESTION DES ENTREPRISES (Inspiré du DayRow) --- */
+/* --- BOUTON FLOTTANT POUR GESTION ENTREPRISES --- */
+.companies-float-btn {
+    position: fixed;
+    top: 12%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #5865f2, #4752c4);
+    border: 2px solid #40444b;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(88, 101, 242, 0.4);
+    z-index: 9999;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.companies-float-btn:hover {
+    box-shadow: 0 12px 40px rgba(88, 101, 242, 0.6);
+    background: linear-gradient(135deg, #4752c4, #3c45a0);
+}
+
+/* --- TITRE AU HOVER POUR BOUTON GESTION ENTREPRISES --- */
+.companies-float-btn::after {
+    content: "Gestion des Entreprises";
+    position: absolute;
+    top: 50%;
+    right: 70px;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #2f3136, #36393f);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 2px solid #40444b;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    z-index: -1;
+}
+
+.companies-float-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(-10px);
+}
+
+/* Animation de retrait du titre avec délai */
+.companies-float-btn:not(:hover)::after {
+    transition: all 0.3s ease 0.3s;
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+}
+
+/* --- FENÊTRE LATÉRALE POUR GESTION ENTREPRISES --- */
+.companies-sidebar {
+    position: fixed;
+    top: 10%;
+    right: -60%;
+    width: fit-content;
+    height: 90%;
+    background: linear-gradient(135deg, #2f3136, #36393f);
+    border: 2px solid #40444b;
+    border-radius: 16px;
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+    .companies-sidebar:hover {
+        border-color: var(--blurple-hover);
+    }
+
+.companies-sidebar.open {
+    right: 1%;
+}
+
+.companies-sidebar-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.companies-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 25px;
+    background: linear-gradient(135deg, #2f3136, #40444b);
+    border-bottom: 1px solid #40444b;
+    border-radius: 14px 14px 0 0;
+}
+
+.companies-sidebar-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.companies-sidebar-close {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #b9bbbe;
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.companies-sidebar-close:hover {
+    background: rgba(237, 66, 69, 0.8);
+    border-color: #ed4245;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.companies-sidebar-body {
+    flex: 1;
+    padding: 20px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.companies-form-section {
+    background: rgba(40, 44, 52, 0.6);
+    border: 1px solid #40444b;
+    border-radius: 12px;
+    padding: 16px;
+    flex-shrink: 0;
+    max-width: 350px;
+}
+
+.companies-list-section {
+    background: rgba(40, 44, 52, 0.3);
+    border: 1px solid #40444b;
+    border-radius: 12px;
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+    max-width: 350px;
+}
+
+.companies-form-section h4,
+.companies-list-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.companies-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.companies-form > .companies-input:first-child {
+    grid-column: 1 / -1;
+}
+
+.companies-input,
+.companies-select {
+    padding: 8px 12px;
+    background: #40444b;
+    border: 1px solid #202225;
+    border-radius: 6px;
+    color: #dcddde;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.companies-input:focus,
+.companies-select:focus {
+    outline: none;
+    border-color: #5865f2;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
+}
+
+.companies-color {
+    width: 100%;
+    height: 36px;
+    border: 1px solid #202225;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #40444b;
+}
+
+.companies-btn-add {
+    background: linear-gradient(135deg, #5865f2, #4752c4);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    grid-column: 1 / -1;
+}
+
+.companies-btn-add:hover {
+    background: linear-gradient(135deg, #4752c4, #3c45a0);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+}
+
+.companies-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: none;
+}
+
+/* --- GESTION DES ENTREPRISES --- */
 
 .company-manage-list {
     display: flex;
@@ -2189,9 +2414,10 @@ input:checked + .ios-slider {
 }
 
 .company-card {
-    display: grid;
+    display: flex;
+    align-items: center;
     grid-template-columns: 6px 1fr auto;
-    background: var(--bg-card);
+    background: var(--bg-light);
     border: 1px solid var(--border-color);
     border-left: 4px solid var(--company-color, var(--blurple));
     border-radius: 8px;
@@ -2199,22 +2425,31 @@ input:checked + .ios-slider {
     overflow: hidden;
     transition: all 0.3s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 0px 0px;
+    padding: 10px 15px; /* Ajoute du padding pour que ça respire */
     min-height: auto;
+    width: 100%; /* IMPORTANT : La carte doit prendre toute la largeur pour pousser le bouton */
+    justify-content: space-between;
+    gap: 15px;
 }
 
     .company-card:hover {
         background: var(--bg-light);
-        transform: translateX(10px);
+        transform: translateX(5px);
+        overflow: hidden;
     }
 
 
 .company-details {
-    padding: 12px 20px;
+    padding: 12px 45px 12px 12px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 4px;
+    order: 1;
+}
+
+.company-actions {
+    order: 2;
+    margin-left: 15px;
 }
 
 .company-main-info {
@@ -2250,23 +2485,24 @@ input:checked + .ios-slider {
     margin-top: 2px;
     margin-bottom: 2px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(0);
     width: fit-content;
     border-radius: 50px;
     padding: 12px 16px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     z-index: 1000;
-    border: 0px solid rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent; /* Évite le saut de pixel */
     min-height: 40px; /* Force la barre à exister visuellement même sans texte */
     background: var(--bg-dark);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
     .discord-floating-bar:hover {
         /* Bord bleu épais (2px) qui s'allume */
-        border: 2px solid var(--blurple) !important;
+        border: 2px solid var(--orange) !important;
         /* Ombre de la même couleur (Blurple) avec 20% d'opacité */
-        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
-        /* Optionnel : transition fluide si elle n'est pas déjà sur l'élément parent */
-        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(88, 101, 242, 0.2);
+        transform: translateX(-50%) translateY(-2px);
+        cursor: pointer;
     }
 
 .floating-bar-actions-center {
@@ -2291,9 +2527,8 @@ input:checked + .ios-slider {
 }
 
     .action-btn-discord:hover {
-        background-color: var(--blurple);
+        background-color: var(--blurple-hover);
         color: white;
-        transform: scale(1.1)
     }
     /*BOUTON SUPPRIMER*/
     .action-btn-discord.danger {
@@ -2301,9 +2536,8 @@ input:checked + .ios-slider {
         color: white;
     }
         .action-btn-discord.danger:hover {
-            background-color: var(--danger);
+            background-color: var(--danger-hover);
             color: white;
-            transform: scale(1.1)
         }
 
 /* Cache le texte sur mobile pour ne garder que les icônes */
