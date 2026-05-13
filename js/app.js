@@ -8,6 +8,7 @@ async function initApp(username) {
     await loadCompanies();
     renderCompaniesUI();
     await loadRecentPlannings(); // Charger les 3 derniers plannings
+    showView('menu-view');
 }
 
 /**

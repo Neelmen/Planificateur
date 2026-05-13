@@ -22,6 +22,7 @@ function toggleCompanyFormPC(show) {
         btn.classList.remove('hidden');
     }
 }
+// --- ui.js ---
 function showView(viewId) {
     // 1. On cache toutes les vues
     document.querySelectorAll('.content-view').forEach(v => v.classList.add('hidden'));
@@ -30,7 +31,15 @@ function showView(viewId) {
     const targetView = document.getElementById(viewId);
     if (targetView) targetView.classList.remove('hidden');
 
-    // 3. Mise à jour du titre
+    // 3. ACTIONS SPÉCIFIQUES LORS DU RETOUR AU MENU
+    if (viewId === 'menu-view') {
+        // On recharge les plannings récents pour mettre à jour les 3 cases
+        if (typeof loadRecentPlannings === 'function') {
+            loadRecentPlannings();
+        }
+    }
+
+    // 4. Mise à jour du titre
     const titles = {
         'menu-view': 'Menu',
         'planning-view': 'Éditeur',
@@ -38,15 +47,14 @@ function showView(viewId) {
     };
     document.getElementById('nav-page-title').innerText = titles[viewId] || 'Planning Pro';
 
-    // 4. Gestion du bouton retour
+    // 5. Gestion du bouton retour
     const backBtn = document.querySelector('.btn-icon');
     if (backBtn) {
         if (viewId === 'menu-view') {
-            // Force la disparition totale immédiate
             backBtn.style.display = 'none';
         } else {
             backBtn.style.display = 'flex';
-            backBtn.onclick = () => showView('menu-view'); // Utilise showView directement
+            backBtn.onclick = () => showView('menu-view');
         }
     }
 }
