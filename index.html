@@ -225,56 +225,6 @@
         </div>
     </div>
 
-    <!-- SIDE-DRAWER MOBILE pour gestion des entreprises -->
-    <div id="side-drawer" class="side-drawer">
-        <div class="drawer-content">
-            <div class="drawer-header">
-                <h3>Gestion des Entreprises</h3>
-                <button class="btn-close" onclick="toggleDrawer(false)">×</button>
-            </div>
-
-            <div class="drawer-body">
-                <!-- Formulaire mobile pour ajouter une entreprise -->
-                <div class="mobile-form-section">
-                    <h4>Ajouter une entreprise</h4>
-                    <div class="form-group">
-                        <label for="comp-name-m">NOM DE L'ENTREPRISE</label>
-                        <input type="text" id="comp-name-m" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="comp-salary-m">TAUX HORAIRE BRUT (€)</label>
-                        <input type="number" id="comp-salary-m" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="comp-type-m">TYPE DE CONTRAT</label>
-                        <select id="comp-type-m" class="custom-select">
-                            <option value="CDI">CDI</option>
-                            <option value="CDD">CDD</option>
-                            <option value="INTERIM">INTÉRIM</option>
-                            <option value="FREELANCE">FREELANCE</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="comp-color-m">COULEUR</label>
-                        <input type="color" id="comp-color-m" value="#5865f2">
-                    </div>
-                    <button type="button" class="btn-new" onclick="saveCompany('mobile')" style="width: 100%;">Enregistrer</button>
-                </div>
-
-                <hr>
-
-                <!-- Liste des entreprises mobile -->
-                <div>
-                    <h4>Mes entreprises</h4>
-                    <div id="companies-list" class="companies-mobile-list"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Overlay pour le side-drawer -->
-    <div id="drawer-overlay" class="drawer-overlay hidden" onclick="toggleDrawer(false)"></div>
-
 
     <!-- MENU EditRow - STYLE DISCORD -->
     <div id="editrow-menu" class="editrow-menu hidden">
