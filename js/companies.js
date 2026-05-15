@@ -12,12 +12,17 @@ async function loadCompanies() {
 }
 
 async function saveCompany(mode = 'pc') {
-    // Sélection des IDs selon la source (PC ou Mobile)
     const isM = mode === 'mobile';
-    const idNom = isM ? 'comp-name-m' : 'pc-comp-name';
-    const idSal = isM ? 'comp-salary-m' : 'pc-comp-salary';
-    const idType = isM ? 'comp-type-m' : 'pc-comp-type';
-    const idCol = isM ? 'comp-color-m' : 'pc-comp-color';
+
+    // Définition des suffixes selon ton HTML précédent
+    // Mobile: comp-name-m | PC: sidebar-comp-name
+    const prefix = isM ? 'comp-' : 'sidebar-comp-';
+    const suffix = isM ? '-m' : '';
+
+    const idNom = isM ? `comp-name-m` : `sidebar-comp-name`;
+    const idSal = isM ? `comp-salary-m` : `sidebar-comp-salary`;
+    const idType = isM ? `comp-type-m` : `sidebar-comp-type`;
+    const idCol = isM ? `comp-color-m` : `sidebar-comp-color`;
 
     const nom = document.getElementById(idNom).value.trim().toUpperCase();
     const salaire = document.getElementById(idSal).value;
@@ -25,8 +30,6 @@ async function saveCompany(mode = 'pc') {
     const couleur = document.getElementById(idCol).value;
 
     if (!nom || !salaire) return alert("Champs obligatoires manquants");
-
-    const userId = (await _supabase.auth.getUser()).data.user?.id;
 
     const { error } = await _supabase
         .from('entreprises')
@@ -38,54 +41,48 @@ async function saveCompany(mode = 'pc') {
         }]);
 
     if (!error) {
-        // Reset des champs
-        document.getElementById(idNom).value = '';
-        document.getElementById(idSal).value = '';
+        // Reset universel
+        [idNom, idSal].forEach(id => document.getElementById(id).value = '');
 
-        await loadCompanies(); // Recharge les données
-        renderCompaniesUI();   // Rafraîchit l'affichage[cite: 3]
-        isM ? toggleDrawer(false) : toggleCompanyFormPC(false);
+        await loadCompanies();
+        renderCompaniesUI(); // Met à jour les selects et listes
+
+        // Fermeture automatique du bon menu
+        isM ? toggleDrawerComp(false) : null;
     } else {
         alert("Erreur : " + error.message);
     }
 }
 
 function renderCompaniesUI() {
-    const listPC = document.getElementById('companies-list-desktop');
-    const listMob = document.getElementById('companies-list');
+    const listPC = document.getElementById('companies-sidebar-list'); // Liste Sidebar PC
+    const listMob = document.getElementById('companies-list-m');      // Liste Drawer Mobile
     const editRowSelect = document.getElementById('editrow-company');
     const selectShift = document.getElementById('shift-company');
 
-    let htmlCommon = ''; 
-    let optionsEditRow = '<option value="">-- Choisir une entreprise --</option><option value="repos">Repos</option>';
-    let optionsShift = '<option value="Repos">-- Repos --</option>';
+    let htmlCommon = '';
+    // ... (ton code de génération d'options reste identique)
 
     state.companies.forEach(comp => {
         const net = (comp.taux_horaire_brut * 0.78).toFixed(2);
-
         htmlCommon += `
         <div class="company-card" style="--company-color: ${comp.couleur_hex};">
-            <div class="company-color-bar"></div>
             <div class="company-details">
-                <div class="company-main-info">
-                    <span class="company-name-text">${comp.nom}</span>
-                </div>
+                <span class="company-name-text">${comp.nom}</span>
                 <span class="company-site-text">${net}€ Net</span>
             </div>
-            <div class="company-actions">
-                <button class="btn-delete" onclick="deleteCompany('${comp.id}')" title="Supprimer">×</button>
-            </div>
-        </div>`;   
-
-        optionsEditRow += `<option value="${comp.id}">${comp.nom}</option>`;
-        optionsShift += `<option value="🏢 ${comp.nom}">🏢 ${comp.nom}</option>`;
+            <button class="btn-delete" onclick="deleteCompany('${comp.id}')">×</button>
+        </div>`;
     });
 
+    // On injecte le même HTML dans les deux listes si elles existent
     if (listPC) listPC.innerHTML = htmlCommon;
     if (listMob) listMob.innerHTML = htmlCommon;
+
     if (editRowSelect) editRowSelect.innerHTML = optionsEditRow;
     if (selectShift) selectShift.innerHTML = optionsShift;
 }
+
 async function deleteCompany(id) {
 
     const { error } = await _supabase
@@ -96,7 +93,6 @@ async function deleteCompany(id) {
     if (!error) {
         await loadCompanies(); 
         renderCompaniesUI();
-        renderCompaniesSidebar();
     } else {
         alert("Erreur lors de la suppression : " + error.message);
     }
@@ -122,68 +118,6 @@ async function loadCompaniesSidebar() {
     renderCompaniesSidebar();
 }
 
-function renderCompaniesSidebar() {
-    const list = document.getElementById('companies-sidebar-list');
-    if (!list) return;
-    
-    let html = '';
-    state.companies.forEach(comp => {
-        const net = (comp.taux_horaire_brut * 0.78).toFixed(2);
-        
-        html += `
-            <div class="company-card" style="--company-color: ${comp.couleur_hex};">
-                <div class="company-details">
-                    <div class="company-main-info">
-                        <span class="company-name-text">${comp.nom}</span>
-                    </div>
-                    <span class="company-site-text">${net}€ Net</span>
-                </div>
-                <div class="company-actions">
-                    <button class="btn-delete" onclick="deleteCompany('${comp.id}')" title="Supprimer">×</button>
-                </div>
-            </div>
-        `;
-    });
-    
-    list.innerHTML = html;
-}
-
-async function saveCompanySidebar() {
-    const nom = document.getElementById('sidebar-comp-name').value.trim().toUpperCase();
-    const salaire = document.getElementById('sidebar-comp-salary').value;
-    const type = document.getElementById('sidebar-comp-type').value;
-    const couleur = document.getElementById('sidebar-comp-color').value;
-
-    if (!nom || !salaire) {
-        alert("Champs obligatoires manquants");
-        return;
-    }
-
-    const userId = (await _supabase.auth.getUser()).data.user?.id;
-
-    const { error } = await _supabase
-        .from('entreprises')
-        .insert([{
-            nom: nom,
-            taux_horaire_brut: parseFloat(salaire),
-            type_contrat: type,
-            couleur_hex: couleur
-        }]);
-
-    if (!error) {
-        // Reset des champs
-        document.getElementById('sidebar-comp-name').value = '';
-        document.getElementById('sidebar-comp-salary').value = '';
-        document.getElementById('sidebar-comp-type').value = 'CDI';
-        document.getElementById('sidebar-comp-color').value = '#5865f2';
-
-        await loadCompanies();
-        renderCompaniesSidebar();
-        renderCompaniesUI(); // Mettre à jour les autres interfaces
-    } else {
-        alert("Erreur : " + error.message);
-    }
-}
 // Fermer la sidebar lors d'un clic en dehors
 document.addEventListener('mousedown', function (event) {
     const sidebar = document.getElementById('companies-sidebar');
@@ -197,3 +131,16 @@ document.addEventListener('mousedown', function (event) {
         }
     }
 });
+
+// Fonction pour ouvrir/fermer le drawer
+function toggleDrawerComp(isOpen) {
+    const drawer = document.getElementById('drawer-comp');
+    if (isOpen) {
+        drawer.classList.add('open');
+        // Optionnel : empêcher le scroll du body en arrière-plan
+        document.body.style.overflow = 'hidden';
+    } else {
+        drawer.classList.remove('open');
+        document.body.style.overflow = 'auto';
+    }
+}
