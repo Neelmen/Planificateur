@@ -45,7 +45,7 @@
             </div>
         </nav>
 
-        <!-- BOUTON POUR AFFICHER SIDEBAR GESTION D'ENTREPRISE' -->
+        <!-- BOUTON POUR AFFICHER SIDEBAR GESTION D'ENTREPRISES' -->
         <button id="companies-float-btn" class="companies-float-btn" onclick="toggleCompaniesSidebar()">🏢</button>
         <!-- Fenêtre latérale pour la gestion des entreprises -->
         <div id="companies-sidebar" class="companies-sidebar">
@@ -78,6 +78,53 @@
                         <div id="companies-sidebar-list" class="companies-list">
                             <!-- Les entreprises seront chargées ici -->
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDE-DRAWER MOBILE GESTION ENTREPRISES-->
+        <div id="drawer-comp" class="drawer-mobile">
+            <div class="drawer-header">
+                <h3>Gestion des Entreprises</h3>
+                <button class="btn-close-drawer" onclick="toggleDrawerComp(false)">×</button>
+            </div>
+
+            <div class="drawer-body">
+                <!-- Section Formulaire -->
+                <div class="mobile-form-card">
+                    <h4>Ajouter une entreprise</h4>
+                    <div class="form-group">
+                        <label for="comp-name-m">NOM DE L'ENTREPRISE</label>
+                        <input type="text" id="comp-name-m" placeholder="Ex: Google">
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-salary-m">TAUX HORAIRE BRUT (€)</label>
+                        <input type="number" id="comp-salary-m" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-type-m">TYPE DE CONTRAT</label>
+                        <select id="comp-type-m">
+                            <option value="CDI">CDI</option>
+                            <option value="CDD">CDD</option>
+                            <option value="INTERIM">INTÉRIM</option>
+                            <option value="FREELANCE">FREELANCE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="comp-color-m">COULEUR</label>
+                        <input type="color" id="comp-color-m" value="#5865f2">
+                    </div>
+                    <button class="btn-new" onclick="saveCompany('mobile')" style="width: 100%; margin-top: 10px;">Enregistrer</button>
+                </div>
+
+                <hr class="separator">
+
+                <!-- Section Liste -->
+                <div class="mobile-list-section">
+                    <h4>Mes entreprises</h4>
+                    <div id="companies-list-m" class="companies-mobile-list">
+                        <!-- Injecté via JS -->
                     </div>
                 </div>
             </div>
