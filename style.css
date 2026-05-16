@@ -1787,3 +1787,21 @@ input[type=number] {
             background-color: #5865f2;
             color: white;
         }
+
+
+/* --- VERSION MOBILE : */
+@media (max-width: 768px) {
+    /* BOUTON GESTION ENTREPRISES affiché */
+    #companies-float-btn {
+        display: flex !important;
+    }
+
+    /* SIDEBAR GESTION ENTREPRISES Caché */
+    #companies-sidebar {
+        display: none !important;
+    }
+
+
+
+
+}
