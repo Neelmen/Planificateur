@@ -2030,11 +2030,16 @@ input[type=number] {
             align-items: center !important;
             justify-content: space-between !important;
             color: var(--text-main) !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             font-size: 1rem !important;
             margin-bottom: 12px !important; /* Espace entre le titre et les lignes de jours */
-            border-bottom: 1px solid var(--bg-light) !important;
+            border-bottom: 2px solid var(--bg-light) !important;
             padding-bottom: 8px !important;
+            background: var(--blurple);
+            padding: 12px 16px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
 
