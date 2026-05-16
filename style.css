@@ -2075,7 +2075,7 @@ input[type=number] {
     /* TOPBAR D'INFORMATIONS PLANNING */
     .discord-info-bar {
         height: auto !important; /* Supprime la hauteur fixe PC pour s'adapter au contenu */
-        padding: 12px 15px !important;
+        padding: 6px 15px !important;
         margin-top: 10px !important; /* Ajustement de la marge haute */
         width: 100% !important;
         box-sizing: border-box !important;
@@ -2083,7 +2083,7 @@ input[type=number] {
     .info-bar-content {
         display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important; /* Crée exactement 2 colonnes égales par ligne */
-        gap: 12px 20px !important; /* Espacement : 12px entre les lignes, 20px entre les colonnes */
+        gap: 6px 20px !important; /* Espacement : 12px entre les lignes, 20px entre les colonnes */
         padding: 0 !important;
         width: 100% !important;
         overflow-x: visible !important; /* Plus besoin du scroll horizontal PC */
@@ -2092,7 +2092,7 @@ input[type=number] {
     .info-item {
         min-width: 0 !important; /* Annule la contrainte PC pour s'adapter au layout grid */
         align-items: center !important; /* Aligne le texte à gauche pour une meilleure lecture sur grille */
-        padding: 4px 0 !important;
+        padding: 2px 0 !important;
     }
     .info-label {
         font-size: 11px !important; /* Réduction proportionnelle de la taille du label */
@@ -2101,14 +2101,13 @@ input[type=number] {
     .info-value {
         font-size: 13px !important; /* Réduction proportionnelle de la taille de la valeur */
     }
-    /* Masquage des séparateurs textuels "|" obsolètes sur une grille multi-lignes */
-    .info-separator {
-        display: none !important;
+
+
+
+    /*NOM DU MOIS DU PLANNING*/
+    .planning-header h2 {
+        margin-bottom: 5px !important; /* Réduit l'espace sous le nom du mois */
+        margin-top: 0px !important; /* Optionnel : remonte aussi le titre vers le haut */
     }
-
-
-
-
-
     /*Autres*/
 }
