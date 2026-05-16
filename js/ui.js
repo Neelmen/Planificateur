@@ -33,13 +33,23 @@ function showView(viewId) {
 
     // 3. ACTIONS SPÉCIFIQUES LORS DU RETOUR AU MENU
     if (viewId === 'menu-view') {
-
         if (typeof loadRecentPlannings === 'function') {
             loadRecentPlannings();
         }
-        // 2. Optionnel : Si la modal liste complète est restée ouverte, on la ferme
         if (typeof fermerModalListePlannings === 'function') {
             fermerModalListePlannings();
+        }
+
+        // GESTION DYNAMIQUE DE L'INDICATEUR DEV DANS LA HOTBAR
+        const indicateurDev = document.getElementById('indicateur-mode-dev');
+        if (indicateurDev) {
+            // Détection automatique basé sur la présence d'un timestamp (?v=) dans les scripts
+            const scriptDev = document.querySelector('script[src*="?v="]');
+            if (scriptDev && !scriptDev.src.includes('v=1.0.0')) {
+                indicateurDev.classList.remove('hidden');
+            } else {
+                indicateurDev.classList.add('hidden');
+            }
         }
     }
 
@@ -61,4 +71,9 @@ function showView(viewId) {
             backBtn.onclick = () => showView('menu-view');
         }
     }
+}
+// À insérer juste après la déclaration de ta variable "const MODE_DEV_SANS_CACHE = true;"
+const indicateurDev = document.getElementById('indicateur-mode-dev');
+if (indicateurDev && MODE_DEV_SANS_CACHE) {
+    indicateurDev.classList.remove('hidden');
 }
