@@ -1970,12 +1970,12 @@ input[type=number] {
         z-index: 99999 !important;
         padding: 20px !important;
         box-sizing: border-box !important;
-        transform: translateY(100%);
+        transform: translateX(100%);
         transition: transform 0.3s ease-in-out !important;
     }
         /* Classe active gérée par le JS pour ouvrir la modal */
         #companies-sidebar.open {
-            transform: translateY(0);
+            transform: translateX(0);
         }
     .companies-sidebar-content {
         height: 100% !important;
