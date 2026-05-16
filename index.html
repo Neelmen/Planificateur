@@ -86,147 +86,154 @@
         <!-- VUE : MENU PRINCIPAL -->
         <div id="menu-view" class="content-view">
 
-            <!-- LISTE PLANNINGS--> >
-            <div class="section-liste-plannings">
-                <button class="btn-primary" onclick="ouvrirModalListePlannings()">
-                    Liste des plannings
-                </button>
-            </div>
+            <div class="conteneur-bouton-dashboard">
 
-            <section class="mosaic-container">
-                <div id="preview-mosaic" class="mosaic-grid"></div>
-            </section>
-
-            <div class="actions-row">
-                <button class="btn-new" onclick="showView('setup-planning-view')">Créer un nouveau planning</button>
-            </div>
-
-            <!-- 3 cases permanentes pour les derniers plannings -->
-            <div class="recent-plannings">
-                <div id="planning-box-1" class="planning-box" onclick="loadRecentPlanning(1)">
-                    <div class="planning-box-content">
-                        <div class="planning-month" id="planning-month-1">--</div>
-                        <div class="planning-year" id="planning-year-1">----</div>
-                    </div>
+                <!-- LISTE PLANNINGS-->
+                <div class="section-liste-plannings">
+                    <button class="bouton-liste-planning" onclick="ouvrirModalListePlannings()">
+                        Liste des plannings
+                    </button>
                 </div>
-                <div id="planning-box-2" class="planning-box" onclick="loadRecentPlanning(2)">
-                    <div class="planning-box-content">
-                        <div class="planning-month" id="planning-month-2">--</div>
-                        <div class="planning-year" id="planning-year-2">----</div>
-                    </div>
+
+                <!-- LISTE PLANNINGS-->
+                <div class="actions-row">
+                    <button class="btn-new" onclick="showView('setup-planning-view')">Créer un nouveau planning</button>
                 </div>
-                <div id="planning-box-3" class="planning-box" onclick="loadRecentPlanning(3)">
-                    <div class="planning-box-content">
-                        <div class="planning-month" id="planning-month-3">--</div>
-                        <div class="planning-year" id="planning-year-3">----</div>
-                    </div>
-                </div>
+
             </div>
 
+                
 
+                <section class="mosaic-container">
+                    <div id="preview-mosaic" class="mosaic-grid"></div>
+                </section>
 
-        </div>
-
-        <!-- VUE : CONFIGURATION NOUVEAU PLANNING -->
-        <div id="setup-planning-view" class="content-view hidden">
-            <div class="flex-center-container">
-                <div class="card-layout" id="setup-planning-section" style="max-width: 400px; width: 100%;">
-                    <h2>Choisissez la période</h2>
-                    <div class="form-group">
-                        <label>MOIS</label>
-                        <select id="setup-month-select" class="custom-select"></select>
+                <!-- 3 cases permanentes pour les derniers plannings -->
+                <div class="recent-plannings">
+                    <div id="planning-box-1" class="planning-box" onclick="loadRecentPlanning(1)">
+                        <div class="planning-box-content">
+                            <div class="planning-month" id="planning-month-1">--</div>
+                            <div class="planning-year" id="planning-year-1">----</div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>ANNÉE</label>
-                        <select id="setup-year-select" class="custom-select"></select>
+                    <div id="planning-box-2" class="planning-box" onclick="loadRecentPlanning(2)">
+                        <div class="planning-box-content">
+                            <div class="planning-month" id="planning-month-2">--</div>
+                            <div class="planning-year" id="planning-year-2">----</div>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 10px; margin-top: 30px;">
-                        <button class="btn-secondary" onclick="showView('menu-view')" style="flex:1;">Retour</button>
-                        <!-- Appel de la fonction de création -->
-                        <button class="btn-new" onclick="startPlanningCreation()" style="flex:2; margin:0;">Continuer</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- VUE : ÉDITEUR DE PLANNING -->
-        <div id="planning-view" class="content-view hidden">
-
-            <div class="planning-header">
-                <h2 id="current-planning-title">PLANNING</h2>
-            </div>
-
-            <div id="capture-area" class="planning-capture-zone">
-
-                <div class="discord-info-bar">
-                    <div class="info-bar-content">
-                        <div class="info-item">
-                            <span class="info-label">⏱️ HEURES</span>
-                            <span class="info-value" id="stat-hours">0h</span>
-                        </div>
-                        <div class="info-separator">|</div>
-                        <div class="info-item">
-                            <span class="info-label">💰 SALAIRE</span>
-                            <span class="info-value" id="stat-salary">0€</span>
-                        </div>
-                        <div class="info-separator">|</div>
-                        <div class="info-item">
-                            <span class="info-label">🚗 KM</span>
-                            <span class="info-value" id="stat-km">0 km</span>
-                        </div>
-                        <div class="info-separator">|</div>
-                        <div class="info-item">
-                            <span class="info-label">📅 JOURS TRAVAILLÉS</span>
-                            <span class="info-value" id="stat-days">0/0</span>
-                        </div>
-                        <div class="info-separator">|</div>
-                        <div class="info-item">
-                            <span class="info-label">📅 REPOS</span>
-                            <span class="info-value" id="stat-rest-days">0/0</span>
-                        </div>
-                        <div class="info-separator">|</div>
-                        <div class="info-item">
-                            <span class="info-label">🏢 ENTREPRISES</span>
-                            <span class="info-value" id="stat-companies">0</span>
+                    <div id="planning-box-3" class="planning-box" onclick="loadRecentPlanning(3)">
+                        <div class="planning-box-content">
+                            <div class="planning-month" id="planning-month-3">--</div>
+                            <div class="planning-year" id="planning-year-3">----</div>
                         </div>
                     </div>
                 </div>
 
+
+
+            </div>
+
+            <!-- VUE : CONFIGURATION NOUVEAU PLANNING -->
+            <div id="setup-planning-view" class="content-view hidden">
+                <div class="flex-center-container">
+                    <div class="card-layout" id="setup-planning-section" style="max-width: 400px; width: 100%;">
+                        <h2>Choisissez la période</h2>
+                        <div class="form-group">
+                            <label>MOIS</label>
+                            <select id="setup-month-select" class="custom-select"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>ANNÉE</label>
+                            <select id="setup-year-select" class="custom-select"></select>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 30px;">
+                            <button class="btn-secondary" onclick="showView('menu-view')" style="flex:1;">Retour</button>
+                            <!-- Appel de la fonction de création -->
+                            <button class="btn-new" onclick="startPlanningCreation()" style="flex:2; margin:0;">Continuer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VUE : ÉDITEUR DE PLANNING -->
+            <div id="planning-view" class="content-view hidden">
+
+                <div class="planning-header">
+                    <h2 id="current-planning-title">PLANNING</h2>
+                </div>
+
+                <div id="capture-area" class="planning-capture-zone">
+
+                    <div class="discord-info-bar">
+                        <div class="info-bar-content">
+                            <div class="info-item">
+                                <span class="info-label">⏱️ HEURES</span>
+                                <span class="info-value" id="stat-hours">0h</span>
+                            </div>
+                            <div class="info-separator">|</div>
+                            <div class="info-item">
+                                <span class="info-label">💰 SALAIRE</span>
+                                <span class="info-value" id="stat-salary">0€</span>
+                            </div>
+                            <div class="info-separator">|</div>
+                            <div class="info-item">
+                                <span class="info-label">🚗 KM</span>
+                                <span class="info-value" id="stat-km">0 km</span>
+                            </div>
+                            <div class="info-separator">|</div>
+                            <div class="info-item">
+                                <span class="info-label">📅 JOURS TRAVAILLÉS</span>
+                                <span class="info-value" id="stat-days">0/0</span>
+                            </div>
+                            <div class="info-separator">|</div>
+                            <div class="info-item">
+                                <span class="info-label">📅 REPOS</span>
+                                <span class="info-value" id="stat-rest-days">0/0</span>
+                            </div>
+                            <div class="info-separator">|</div>
+                            <div class="info-item">
+                                <span class="info-label">🏢 ENTREPRISES</span>
+                                <span class="info-value" id="stat-companies">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="calendar-container" class="calendar-grid"></div>
+
+
+
+                </div>
+
+                <!-- Conteneur pour le calendrier généré par planning.js -->
                 <div id="calendar-container" class="calendar-grid"></div>
+                <div class="discord-floating-bar">
+                    <div class="floating-bar-content">
+                        <div class="floating-bar-actions-center">
+                            <button class="action-btn-discord" onclick="sharePlanning()" title="Partager">
+                                <span class="icon">📤</span>
+                                <span class="label">Partager</span>
+                            </button>
 
+                            <div class="separator-v"></div>
 
+                            <button class="action-btn-discord" onclick="resetPlanning()" title="Réinitialiser">
+                                <span class="icon">🔄</span>
+                                <span class="label">Réinitialiser</span>
+                            </button>
 
-            </div>
+                            <div class="separator-v"></div>
 
-            <!-- Conteneur pour le calendrier généré par planning.js -->
-            <div id="calendar-container" class="calendar-grid"></div>
-            <div class="discord-floating-bar">
-                <div class="floating-bar-content">
-                    <div class="floating-bar-actions-center">
-                        <button class="action-btn-discord" onclick="sharePlanning()" title="Partager">
-                            <span class="icon">📤</span>
-                            <span class="label">Partager</span>
-                        </button>
-
-                        <div class="separator-v"></div>
-
-                        <button class="action-btn-discord" onclick="resetPlanning()" title="Réinitialiser">
-                            <span class="icon">🔄</span>
-                            <span class="label">Réinitialiser</span>
-                        </button>
-
-                        <div class="separator-v"></div>
-
-                        <button class="action-btn-discord danger" onclick="deletePlanning()" title="Supprimer">
-                            <span class="icon">🗑️</span>
-                            <span class="label">Supprimer</span>
-                        </button>
+                            <button class="action-btn-discord danger" onclick="deletePlanning()" title="Supprimer">
+                                <span class="icon">🗑️</span>
+                                <span class="label">Supprimer</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </div>
 
 
 
