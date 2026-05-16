@@ -454,103 +454,92 @@ body {
     background: #36393f;
 }
 
-/* --- Planning List Styles --- */
-.planning-list-section {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
+/* --- LISTES des Planning --- */
+.section-liste-plannings {
+    margin-top: 30px;
+    width: 100%;
 }
 
-.btn-planning-list {
-    background: #5865f2;
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
+    .section-liste-plannings h3 {
+        font-size: 1.2rem;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+    }
+
+.conteneur-liste-plannings {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+    padding: 15px 0;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.carte-planning {
+    background-color: var(--bg-darker);
+    border: 1px solid var(--bg-light);
     border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 2px 4px rgba(88, 101, 242, 0.3);
-}
-
-.btn-planning-list:hover {
-    background: #4752c4;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(88, 101, 242, 0.4);
-}
-
-.btn-planning-list:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(88, 101, 242, 0.3);
-}
-
-.planning-list-modal {
-    max-width: 600px;
-    max-height: 70vh;
-}
-
-.planning-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.planning-item {
-    background: #40444b;
-    border: 1px solid #202225;
-    border-radius: 6px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
 }
 
-.planning-item:hover {
-    background: #4f545c;
-    border-color: #5865f2;
-    transform: translateX(2px);
-}
+    .carte-planning:hover {
+        background-color: var(--bg-light);
+    }
 
-.planning-item-info {
+.info-planning {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
 
-.planning-item-month {
-    font-size: 16px;
-    font-weight: 600;
-    color: #dcddde;
+.mois-planning {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-main);
     text-transform: capitalize;
 }
 
-.planning-item-year {
-    font-size: 14px;
-    color: #b9bbbe;
+.annee-planning {
+    font-size: 0.85rem;
+    color: var(--text-muted);
 }
 
-.planning-item-arrow {
-    color: #5865f2;
-    font-size: 18px;
-    font-weight: bold;
-    transition: transform 0.2s ease;
+.actions-planning {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.planning-item:hover .planning-item-arrow {
-    transform: translateX(4px);
+.bouton-supprimer-planning {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.no-plannings {
+    .bouton-supprimer-planning:hover {
+        background-color: rgba(250, 119, 124, 0.1);
+        color: var(--danger-hover);
+    }
+
+.liste-vide {
+    grid-column: 1 / -1;
     text-align: center;
-    color: #b9bbbe;
+    color: var(--text-dark);
     font-style: italic;
-    padding: 40px 20px;
+    padding: 20px;
 }
 
 
@@ -1584,7 +1573,7 @@ input[type=number] {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 9999 !important; /* Assure que la modale est au-dessus de tout */
 }
 
 /* Fond sombre derrière la modale */
@@ -1595,6 +1584,17 @@ input[type=number] {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.85); /* Très sombre pour faire ressortir la modale */
+    z-index: -1; /* Place le backdrop derrière la carte de la modale */
+}
+.discord-modal-content {
+    position: relative;
+    background-color: var(--bg-card);
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px;
+    z-index: 2; /* Devant le backdrop */
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
 /* La carte de la modale */
@@ -1787,10 +1787,104 @@ input[type=number] {
             background-color: #5865f2;
             color: white;
         }
+/*LISTE PLANNING*/
+#planning-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 3 colonnes sur PC, s'ajuste automatiquement */
+    gap: 20px;
+    margin-top: 20px;
+    width: 100%;
+}
 
+/* --- LES CARTES DE PLANNING (Générées par le JS) --- */
+.planning-card {
+    background: var(--bg-card);
+    border: 2px solid var(--bg-light);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+    .planning-card:hover {
+        border-color: var(--blurple);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
+    }
+
+/* Contenu textuel de la carte */
+.planning-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.planning-card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.planning-card-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+#planning-list-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.75) !important; /* Arrière-plan sombre semi-transparent */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    z-index: 99999 !important; /* Force l'affichage au-dessus de tout le reste */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+    /* Gestion du masquage de la modale via votre classe .hidden */
+    #planning-list-modal.hidden {
+        display: none !important;
+    }
+
+    /* --- 2. LA STRUCTURE INTERNE DE LA MODALE --- */
+    #planning-list-modal .discord-modal-content {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--bg-light) !important;
+        border-radius: 12px !important;
+        width: 100% !important;
+        max-width: 600px !important;
+        max-height: 85vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+        overflow: hidden !important;
+    }
+
+    #planning-list-modal .discord-modal-header {
+        padding: 20px !important;
+        border-bottom: 1px solid var(--bg-light) !important;
+        color: var(--text-main) !important;
+    }
+
+    #planning-list-modal .discord-modal-body {
+        padding: 20px !important;
+        overflow-y: auto !important; /* Permet le défilement si beaucoup de plannings */
+        flex: 1 !important;
+    }
 
 /* --- VERSION MOBILE : */
 @media (max-width: 768px) {
+    /*SIDEBAR*/
     #companies-sidebar {
         position: fixed !important;
         top: 0 !important;
@@ -1826,4 +1920,11 @@ input[type=number] {
         font-size: 2rem !important;
         padding: 5px 10px !important;
     }
+    /*LISTE de PLANNING*/
+    #planning-list {
+        grid-template-columns: 1fr; /* Force 1 seule colonne sur mobile */
+        gap: 15px;
+    }
+    /*AUTRES*/
+
 }

@@ -85,6 +85,14 @@
 
         <!-- VUE : MENU PRINCIPAL -->
         <div id="menu-view" class="content-view">
+
+            <!-- LISTE PLANNINGS--> >
+            <div class="section-liste-plannings">
+                <button class="btn-primary" onclick="ouvrirModalListePlannings()">
+                    Liste des plannings
+                </button>
+            </div>
+
             <section class="mosaic-container">
                 <div id="preview-mosaic" class="mosaic-grid"></div>
             </section>
@@ -115,12 +123,7 @@
                 </div>
             </div>
 
-            <!-- Section liste des plannings -->
-            <div class="planning-list-section">
-                <button class="btn-planning-list" onclick="togglePlanningList()">
-                    📋 Liste des plannings
-                </button>
-            </div>
+
 
         </div>
 
@@ -225,7 +228,7 @@
         </div>
     </div>
 
-    
+
 
     <!-- MENU EditRow - STYLE DISCORD -->
     <div id="editrow-menu" class="editrow-menu hidden">
@@ -283,21 +286,7 @@
         </div>
     </div>
 
-    <!-- MODALE LISTE DES PLANNINGS - STYLE DISCORD -->
-    <div id="planning-list-modal" class="discord-modal hidden">
-        <div class="discord-modal-backdrop" onclick="togglePlanningList()"></div>
-        <div class="discord-modal-content planning-list-modal">
-            <div class="discord-modal-header">
-                <h3>📋 Liste des plannings</h3>
-                <button class="discord-close-btn" onclick="togglePlanningList()">×</button>
-            </div>
-            <div class="discord-modal-body">
-                <div id="planning-list-container" class="planning-list-container">
-                    <!-- La liste sera remplie dynamiquement -->
-                </div>
-            </div>
-        </div>
-    </div>
+
     <!-- CANVA -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- SCRIPTS MODULAIRES -->
@@ -334,5 +323,18 @@
         <button class="danger" onclick="clearCurrentRow()">Effacer</button>
     </div>
 
+    <!-- MODAL LISTE PLANNING -->
+    <div id="modal-liste-plannings" class="discord-modal hidden">
+        <div class="discord-modal-backdrop" onclick="fermerModalListePlannings()"></div>
+
+        <div class="discord-modal-content">
+            <div class="discord-modal-header">
+                <h3>Liste des plannings</h3>
+                <button class="btn-close" onclick="fermerModalListePlannings()">×</button>
+            </div>
+            <div id="conteneur-liste-plannings" class="conteneur-liste-plannings">
+            </div>
+        </div>
+    </div>
 </body>
 </html>
