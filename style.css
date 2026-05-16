@@ -1999,8 +1999,19 @@ input[type=number] {
         grid-template-columns: 1fr; /* Force 1 seule colonne sur mobile */
         gap: 15px;
     }
-    /*AUTRES*/
-    .calendar-list{
-        display: none !important;
+    /*AFFICHAGE DES SEMAINES DANS LE PLANNING*/
+    .calendar-list { /* 1. On s'assure que le conteneur global redevient visible */
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
     }
+        .calendar-list .planning-week { /* 2. On cache par défaut TOUTES les semaines du planning */
+
+            display: none !important;
+        }
+
+            .calendar-list .planning-week:first-of-type { /* 3. On force l'affichage de la PREMIÈRE semaine uniquement */
+                display: block !important; /* Ou 'flex' selon la structure d'alignement de vos lignes */
+            }
+    /*Autres*/
 }
