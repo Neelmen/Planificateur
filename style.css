@@ -1544,7 +1544,7 @@ input[type=number] {
     padding-right: 20px;
 }
 
-/* --- BARRE FLOTTANTE STYLE DISCORD --- */
+/* --- BARRE FLOTTANTE TOOLBAR --- */
 .discord-floating-bar {
     position: relative;
     bottom: 24px;
@@ -2000,7 +2000,7 @@ input[type=number] {
         gap: 15px;
     }
     /*AUTRES*/
-    #planning-grid .planning-row {
+    .calendar-list{
         display: none !important;
     }
 }
