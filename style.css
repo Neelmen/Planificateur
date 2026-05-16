@@ -987,13 +987,13 @@ input, select {
     background-color: var(--bg-darker) !important;
     border: 1px solid rgba(0,0,0,0.3);
     border-radius: 4px;
-    color: #dbdee1;
+    color: #dbdee1 !important; /* Force la couleur du texte sélectionné */
     font-size: 1rem;
 }
 
-    input:focus, select:focus {
-        border-color: var(--blurple);
-        outline: none;
+    select option {
+        color: #dbdee1 !important;
+        background-color: var(--bg-darker) !important;
     }
 
 .btn-secondary {
@@ -2000,59 +2000,49 @@ input[type=number] {
         gap: 15px;
     }
     /*AFFICHAGE DES SEMAINES DANS LE PLANNING*/
-    .calendar-list { /* 1. On s'assure que le conteneur global redevient visible */
+    .calendar-list {
         display: flex !important;
         flex-direction: column !important;
-        gap: 10px !important;
+        gap: 20px !important;
+        padding: 5px !important;
     }
-        .calendar-list .week-block { /* 2. On cache par défaut TOUTES les semaines du planning */
 
+        /* 1. On cache TOUTES les semaines par défaut sur mobile */
+        .calendar-list .week-block {
             display: none !important;
         }
 
-        /* 2. On applique le style PC UNIQUEMENT à la PREMIÈRE semaine visible */
-    .calendar-list .week-block:first-of-type { 
-        flex: 1 !important;
-        min-width: 250px !important;
-        max-width: none !important;
-        background: #2f3136;
-        border-radius: 12px;
-        border: 2px solid #40444b;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        overflow: hidden;
-        transition: all 0.3s ease;
-        flex-direction: column;
-        height: 100%;
-        flex-shrink: 0 !important;
-        grid-template-rows: repeat(7, minmax(60px, auto));
-        gap: 10px;
-        margin-bottom: 20px;
-        display: block !important; 
-        background-color: var(--bg-card) !important;
-        padding: 15px !important;
-        box-sizing: border-box !important;
-    }
-        /* Effet Hover identique au PC sur la semaine active */
-        .calendar-list .week-block:first-of-type:hover {
-            border-color: var(--blurple) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-        }
-        .calendar-list .week-block:first-of-type .week-header {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            color: var(--text-main) !important;
-            font-weight: 700 !important;
-            font-size: 1rem !important;
-            margin-bottom: 12px !important; /* Espace entre le titre et les lignes de jours */
-            border-bottom: 2px solid var(--bg-light) !important;
-            padding-bottom: 8px !important;
-            background: var(--blurple);
-            padding: 12px 16px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+            /* 2. On applique EXACTEMENT le style PC à la PREMIÈRE semaine visible */
+            .calendar-list .week-block:first-of-type {
+                display: flex !important; /* Conserve l'alignement structurel du PC */
+                flex-direction: column !important;
+                background-color: var(--bg-card) !important;
+                border: 1px solid var(--bg-light) !important;
+                border-radius: 8px !important;
+                padding: 20px !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; /* Ombre identique PC */
+                box-sizing: border-box !important;
+                transition: all 0.3s ease !important;
+            }
+
+                /* Effet Hover identique au PC */
+                .calendar-list .week-block:first-of-type:hover {
+                    border-color: var(--blurple) !important;
+                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+                }
+
+                /* 3. Style du titre de la semaine (.week-header) identique au PC */
+                .calendar-list .week-block:first-of-type .week-header {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                    color: var(--text-main) !important;
+                    font-weight: 700 !important;
+                    font-size: 1.1rem !important;
+                    margin-bottom: 15px !important;
+                    border-bottom: 1px solid var(--bg-light) !important;
+                    padding-bottom: 10px !important;
+                }
 
 
 
