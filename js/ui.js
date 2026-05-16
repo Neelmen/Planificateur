@@ -34,8 +34,8 @@ function showView(viewId) {
     // 3. ACTIONS SPÉCIFIQUES LORS DU RETOUR AU MENU
     if (viewId === 'menu-view') {
         // On recharge les plannings récents pour mettre à jour les 3 cases
-        if (typeof loadRecentPlannings === 'function') {
-            loadRecentPlannings();
+        if (typeof window.chargerListePlannings === 'function') {
+            window.chargerListePlannings();
         }
     }
 

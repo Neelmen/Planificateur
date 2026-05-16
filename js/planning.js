@@ -1829,3 +1829,157 @@ document.getElementById('calendar-container').addEventListener('contextmenu', (e
         // C'est ici qu'on affichera ta div "liste de boutons" plus tard
     }
 });
+/**
+ * Charge tous les plannings de l'utilisateur connecté depuis Supabase
+ */
+
+/**
+ * Ouvre et initialise l'éditeur avec un planning sélectionné
+ */
+window.ouvrirPlanningExistant = async function (planning) {
+    PlanningState.currentPlanning = planning;
+    state.currentPlanning = planning;
+
+    // Extraction du numéro de mois depuis son nom stocké
+    const indexMois = MONTHS.indexOf(planning.month_name);
+    PlanningState.currentMonth = indexMois !== -1 ? indexMois + 1 : new Date().getMonth() + 1;
+    PlanningState.currentYear = planning.year;
+    PlanningState.companies = state.companies || [];
+
+    showView('planning-view');
+
+    const titreEditeur = document.getElementById('current-planning-title');
+    if (titreEditeur) {
+        titreEditeur.innerText = `${planning.month_name} ${planning.year}`.toUpperCase();
+    }
+
+    await generateCalendar();
+};
+
+/**
+ * Gère l'action de suppression via votre modal existante ou confirmation directe
+ */
+window.demanderSuppressionPlanning = async function (idPlanning, libelle) {
+    if (confirm(`Voulez-vous vraiment supprimer définitivement le planning de ${libelle} ?`)) {
+        try {
+            // Étape 1 : Supprimer les shifts liés à ce planning
+            await _supabase.from('shifts').delete().eq('planning_id', idPlanning);
+
+            // Étape 2 : Supprimer le planning
+            const { error } = await _supabase.from('plannings').delete().eq('id', idPlanning);
+
+            if (error) throw error;
+
+            // Rafraîchir la liste instantanément
+            await window.chargerListePlannings();
+        } catch (err) {
+            console.error("Erreur suppression planning:", err);
+            alert("Impossible de supprimer le planning.");
+        }
+    }
+};
+/**
+ * Ouvre la modal et charge l'intégralité des plannings
+ */
+window.ouvrirModalListePlannings = async function () {
+    const modal = document.getElementById('modal-liste-plannings');
+    if (modal) modal.classList.remove('hidden');
+    await window.chargerListeCompletePlannings();
+};
+
+/**
+ * Ferme la modal de la liste
+ */
+window.fermerModalListePlannings = function () {
+    const modal = document.getElementById('modal-liste-plannings');
+    if (modal) modal.classList.add('hidden');
+};
+
+/**
+ * Récupère et injecte TOUS les plannings dans la modal avec sélecteurs en français
+ */
+window.chargerListeCompletePlannings = async function () {
+    const conteneur = document.getElementById('conteneur-liste-plannings');
+    if (!conteneur) return;
+
+    try {
+        const { data: plannings, error } = await _supabase
+            .from('plannings')
+            .select('*')
+            .eq('user_id', state.user.id)
+            .order('year', { ascending: false });
+
+        if (error) throw error;
+
+        if (!plannings || plannings.length === 0) {
+            conteneur.innerHTML = '<p class="liste-vide">Aucun planning enregistré.</p>';
+            return;
+        }
+
+        conteneur.innerHTML = '';
+
+        plannings.forEach(p => {
+            const carte = document.createElement('div');
+            carte.className = 'carte-planning';
+
+            // Clic sur la carte pour ouvrir
+            carte.onclick = () => {
+                window.fermerModalListePlannings();
+                window.ouvrirPlanningExistant(p);
+            };
+
+            carte.innerHTML = `
+                <div class="info-planning">
+                    <span class="mois-planning">${p.month_name}</span>
+                    <span class="annee-planning">${p.year}</span>
+                </div>
+                <button class="bouton-supprimer-planning" title="Supprimer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            `;
+
+            // Gestion de la suppression sans déclencher l'ouverture
+            const boutonSuppr = carte.querySelector('.bouton-supprimer-planning');
+            boutonSuppr.onclick = (e) => {
+                e.stopPropagation();
+                window.demanderSuppressionPlanning(p.id, `${p.month_name} ${p.year}`);
+            };
+
+            conteneur.appendChild(carte);
+        });
+
+    } catch (err) {
+        console.error("Erreur lors du chargement de la liste complète :", err);
+    }
+};
+
+/**
+ * Modifie la fonction de suppression pour rafraîchir les deux affichages en même temps
+ */
+window.demanderSuppressionPlanning = async function (idPlanning, libelle) {
+    if (confirm(`Voulez-vous vraiment supprimer définitivement le planning de ${libelle} ?`)) {
+        try {
+            // 1. Supprimer les shifts associés
+            await _supabase.from('shifts').delete().eq('planning_id', idPlanning);
+
+            // 2. Supprimer le planning
+            const { error } = await _supabase.from('plannings').delete().eq('id', idPlanning);
+
+            if (error) throw error;
+
+            // 3. Rafraîchir la liste de la modal
+            await window.chargerListeCompletePlannings();
+
+            // 4. Mettre à jour l'affichage des récents du dashboard (displayRecentPlannings)
+            if (typeof loadRecentPlannings === 'function') {
+                await loadRecentPlannings();
+            }
+        } catch (err) {
+            console.error("Erreur lors de la suppression :", err);
+            alert("Erreur lors de la suppression du planning.");
+        }
+    }
+};
