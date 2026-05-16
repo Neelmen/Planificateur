@@ -558,12 +558,11 @@ async function populateEditRowSelectors() {
     const companySelect = document.getElementById('editrow-company');
 
     if (companySelect) {
-        // Reset et options par défaut
         companySelect.innerHTML = `
-            <option value="">-- Choisir une entreprise --</option>
-            <option value="repos">Repos</option>
-        `;
-
+        <option value="Repos" selected>Repos</option>
+        <option value="Vacance">Vacance</option>
+    `;
+    
         // UTILISATION DE state.companies (chargé au démarrage dans app.js)
         const companies = state.companies || [];
 
@@ -641,8 +640,7 @@ function resetEditRow() {
     const kmInput = document.getElementById('editrow-km');
     const nightSwitch = document.getElementById('editrow-is-night');
 
-    if (companySelect) companySelect.value = '';
-    if (hoursInput) hoursInput.value = '';
+    if (companySelect) companySelect.value = 'Repos'; 
     if (siteSelect) siteSelect.value = '';
     if (kmInput) kmInput.value = '';
     if (nightSwitch) nightSwitch.checked = false;
