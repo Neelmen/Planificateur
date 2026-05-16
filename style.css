@@ -641,13 +641,13 @@ body {
     }
 
         .week-block:hover {
-            border-color: #4752c4;
+            border-color: var(--blurple);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
         }
-    
+
     .week-header {
-        background: linear-gradient(135deg, #5865f2, #4752c4);
+        background: var(--blurple);
         color: #ffffff;
         padding: 12px 16px;
         font-weight: 700;
@@ -2010,8 +2010,31 @@ input[type=number] {
             display: none !important;
         }
 
-        .calendar-list .week-block:first-of-type { /* 3. On force l'affichage de la PREMIÈRE semaine uniquement */
-            display: block !important; /* Ou 'flex' selon la structure d'alignement de vos lignes */
+        /* 2. On applique le style PC UNIQUEMENT à la PREMIÈRE semaine visible */
+    .calendar-list .week-block:first-of-type { 
+        display: block !important; 
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--bg-light) !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        box-sizing: border-box !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+        /* Effet Hover identique au PC sur la semaine active */
+        .calendar-list .week-block:first-of-type:hover {
+            border-color: var(--blurple) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        }
+        .calendar-list .week-block:first-of-type .week-header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            color: var(--text-main) !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            margin-bottom: 12px !important; /* Espace entre le titre et les lignes de jours */
+            border-bottom: 1px solid var(--bg-light) !important;
+            padding-bottom: 8px !important;
         }
 
 
