@@ -1177,7 +1177,7 @@ function resetPlanningCreationForm() {
 function closeAllModals() {
     try {
         // Fermer la modale de liste des plannings
-        const planningListModal = document.getElementById('planning-list-modal');
+        const planningListModal = document.getElementById('modal-liste-plannings');
         if (planningListModal) {
             planningListModal.classList.add('hidden');
         }
@@ -1282,7 +1282,7 @@ async function sharePlanning() {
  * Bascule l'affichage de la liste des plannings
  */
 window.togglePlanningList = async function() {
-    const modal = document.getElementById('planning-list-modal');
+    const modal = document.getElementById('modal-liste-plannings');
     
     if (modal.classList.contains('hidden')) {
         // Afficher la modale et charger tous les plannings
