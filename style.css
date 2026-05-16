@@ -135,6 +135,94 @@ body {
 }
 
 
+.planning-box {
+    flex: 1;
+    min-width: 120px;
+    background: var(--bg-card);
+    border: 2px solid var(--bg-light);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.planning-box:hover {
+    border-color: var(--blurple);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
+}
+
+.planning-box.empty {
+    border-color: var(--text-dark);
+    opacity: 0.6;
+}
+
+.planning-box.empty:hover {
+    border-color: var(--text-muted);
+    transform: translateY(-2px);
+}
+
+.planning-box-content {
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.planning-month {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.planning-year {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.planning-box.empty .planning-month {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.planning-box.empty .planning-year {
+    color: var(--text-dark);
+}
+
+.mosaic-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.mosaic-item {
+    aspect-ratio: 16 / 10;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 2px dashed #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+    .mosaic-item.active {
+        border: 2px solid var(--blurple);
+        cursor: pointer;
+    }
+
+        .mosaic-item.active:hover {
+            background: var(--bg-light);
+            transform: translateY(-3px);
+        }
 
 /* Badges FÉRIÉ inclinés */
 .holiday-badge {
@@ -365,23 +453,7 @@ body {
 .editrow-btn-secondary:hover {
     background: #36393f;
 }
-/* PLANNING */
-.calendar-list {
-    display: flex;
-    flex-direction: column; /* Sur mobile : les semaines s'empilent verticalement */
-    gap: 15px;
-    padding: 10px;
-    width: 100%;
-}
 
-.week-block {
-    width: 100%;
-    background: #2f3136;
-    border-radius: 12px;
-    border: 2px solid #40444b;
-    padding: 10px;
-    box-sizing: border-box;
-}
 /* --- Planning List Styles --- */
 .planning-list-section {
     display: flex;
@@ -1715,236 +1787,3 @@ input[type=number] {
             background-color: #5865f2;
             color: white;
         }
-        /*--- VERSION PC : */
-
-@media (min-width: 769px) {
-    /*  BOX PLANNING */
-    .planning-box {
-        flex: 1;
-        min-width: 120px;
-        background: var(--bg-card);
-        border: 2px solid var(--bg-light);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .planning-box:hover {
-            border-color: var(--blurple);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
-        }
-
-        .planning-box.empty {
-            border-color: var(--text-dark);
-            opacity: 0.6;
-        }
-
-            .planning-box.empty:hover {
-                border-color: var(--text-muted);
-                transform: translateY(-2px);
-            }
-
-    .planning-box-content {
-        padding: 20px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .planning-month {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--text-main);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .planning-year {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        font-weight: 500;
-    }
-
-    .planning-box.empty .planning-month {
-        color: var(--text-muted);
-        font-size: 1rem;
-    }
-
-    .planning-box.empty .planning-year {
-        color: var(--text-dark);
-    }
-
-    .mosaic-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-top: 20px;
-    }
-
-    .mosaic-item {
-        aspect-ratio: 16 / 10;
-        background: var(--bg-card);
-        border-radius: 12px;
-        border: 2px dashed #444;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-        .mosaic-item.active {
-            border: 2px solid var(--blurple);
-            cursor: pointer;
-        }
-
-            .mosaic-item.active:hover {
-                background: var(--bg-light);
-                transform: translateY(-3px);
-            }
-
-}
-    /* --- VERSION MOBILE : */
-    @media (max-width: 768px) {
-        /* BOUTON GESTION ENTREPRISES affiché */
-        #companies-float-btn {
-            display: flex !important;
-        }
-
-        /* SIDEBAR GESTION ENTREPRISES Caché */
-        #companies-sidebar {
-            display: none !important;
-        }
-        /* SEMAINES planning Caché */
-        .planning-box {
-            display: none !important;
-        }
-
-        /*TOOL BARRE FLOTANTE POSITION EN BAS FORCER*/
-        .discord-floating-bar {
-            /* Positionnement */
-            position: fixed !important;
-            bottom: 15px !important; /* Petit espace avec le bord bas */
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            display: flex !important;
-            /* Taille proportionnelle */
-            width: 90vw !important; /* Prend 90% de la largeur de l'écran */
-            max-width: 400px; /* Sécurité pour les grandes tablettes */
-            /* Style Discord */
-            background-color: var(--bg-darker);
-            padding: 8px 15px;
-            border-radius: 25px; /* Look arrondi type pilule */
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            z-index: 1000;
-        }
-
-            .discord-floating-bar button,
-            .discord-floating-bar .bar-item {
-                flex: 1;
-                display: flex;
-                justify-content: center;
-                font-size: 1.2rem; /* Taille adaptée au tactile */
-                background: none;
-                border: none;
-                color: var(--text-muted);
-            }
-       /* PLANNING BOX */
-       .planning-box {
-        flex: 1;
-        width: 100%;
-        background: var(--bg-card);
-        border: 2px solid var(--bg-light);
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        }
-
-        .planning-box:hover {
-            border-color: var(--blurple);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(88, 101, 242, 0.2);
-        }
-
-        .planning-box.empty {
-            border-color: var(--text-dark);
-            opacity: 0.6;
-        }
-
-            .planning-box.empty:hover {
-                border-color: var(--text-muted);
-                transform: translateY(-2px);
-            }
-
-        .planning-box-content {
-        padding: 20px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-        }
-
-        .planning-month {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--text-main);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-     }
-
-        .planning-year {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        font-weight: 500;
-        }
-
-        .planning-box.empty .planning-month {
-        color: var(--text-muted);
-        font-size: 1rem;
-     }
-
-        .planning-box.empty .planning-year {
-        color: var(--text-dark);
-        }
-
-        .mosaic-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-        margin-top: 20px;
-        width: 100%;
-        }
-
-        .mosaic-item {
-        aspect-ratio: 16 / 10;
-        background: var(--bg-card);
-        border-radius: 12px;
-        border: 2px dashed #444;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        }
-
-        .mosaic-item.active {
-            border: 2px solid var(--blurple);
-            cursor: pointer;
-        }
-
-            .mosaic-item.active:hover {
-                background: var(--bg-light);
-                transform: translateY(-3px);
-            }
-
-}
