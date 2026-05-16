@@ -296,14 +296,39 @@
 
     <!-- CANVA -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- SCRIPTS MODULAIRES -->
-    <script src="js/config.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/companies.js"></script>
-    <script src="js/holidays.js"></script>
-    <script src="js/planning.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/app.js"></script>
+    
+    <script>
+        (function () {
+            // Change à 'false' pour désactiver instantanément et revenir au comportement normal
+            const MODE_DEV_SANS_CACHE = true;
+
+            const version = MODE_DEV_SANS_CACHE ? Date.now() : '1.0.0';
+
+            // 1. Force le rafraîchissement du CSS
+            const cssLink = document.querySelector('link[rel="stylesheet"]');
+            if (cssLink) {
+                cssLink.href = cssLink.href.split('?')[0] + '?v=' + version;
+            }
+
+            // 2. Liste de tes scripts à charger de manière dynamique sans cache
+            const scripts = [
+                "js/config.js",
+                "js/ui.js",
+                "js/companies.js",
+                "js/holidays.js",
+                "js/planning.js",
+                "js/auth.js",
+                "js/app.js"
+            ];
+
+            scripts.forEach(src => {
+                const script = document.createElement('script');
+                script.src = src + '?v=' + version;
+                script.async = false; // Garantit que les scripts s'exécutent dans l'ordre exact
+                document.body.appendChild(script);
+            });
+        })();
+    </script>
 
     <!-- ALERT CONFIRM DELETE PLANNING -->
     <div id="confirm-modal" class="discord-modal hidden">
