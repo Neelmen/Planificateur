@@ -2012,37 +2012,26 @@ input[type=number] {
             display: none !important;
         }
 
-            /* 2. On applique EXACTEMENT le style PC à la PREMIÈRE semaine visible */
-            .calendar-list .week-block:first-of-type {
-                display: flex !important; /* Conserve l'alignement structurel du PC */
-                flex-direction: column !important;
-                background-color: var(--bg-card) !important;
-                border: 1px solid var(--bg-light) !important;
-                border-radius: 8px !important;
-                padding: 20px !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important; /* Ombre identique PC */
-                box-sizing: border-box !important;
-                transition: all 0.3s ease !important;
-            }
+    .week-block:first-of-type {
+        flex: 1 !important;
+        min-width: 250px !important;
+        max-width: none !important;
+        background: #2f3136;
+        border-radius: 12px;
+        border: 2px solid #40444b;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        flex-shrink: 0 !important;
+        grid-template-rows: repeat(7, minmax(60px, auto));
+        gap: 10px;
+        margin-bottom: 20px;
+    }
 
-                /* Effet Hover identique au PC */
-                .calendar-list .week-block:first-of-type:hover {
-                    border-color: var(--blurple) !important;
-                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
-                }
-
-                /* 3. Style du titre de la semaine (.week-header) identique au PC */
-                .calendar-list .week-block:first-of-type .week-header {
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: space-between !important;
-                    color: var(--text-main) !important;
-                    font-weight: 700 !important;
-                    font-size: 1.1rem !important;
-                    margin-bottom: 15px !important;
-                    border-bottom: 1px solid var(--bg-light) !important;
-                    padding-bottom: 10px !important;
-                }
+    /* 3. Style du titre de la semaine (.week-header) identique au PC */   
     .week-header {
         background: var(--blurple);
         color: #ffffff;
