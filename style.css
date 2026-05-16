@@ -1788,52 +1788,11 @@ input[type=number] {
             color: white;
         }
 
+
 /* --- VERSION MOBILE : */
-
 @media (max-width: 768px) {
-    /* BOUTON GESTION ENTREPRISES affiché */
+    #companies-sidebar,
     #companies-float-btn {
-        display: flex !important;
-    }
-
-    /* SIDEBAR GESTION ENTREPRISES Caché */
-    #companies-sidebar {
         display: none !important;
     }
-    /* SEMAINES planning Caché */
-    .planning-box {
-        display: none !important;
-    }
-
-    /*TOOL BARRE FLOTANTE POSITION EN BAS FORCER*/
-        .discord-floating-bar {
-            /* Positionnement */
-            position: fixed !important;
-            bottom: 15px !important; /* Petit espace avec le bord bas */
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            display: flex !important;
-            /* Taille proportionnelle */
-            width: 90vw !important; /* Prend 90% de la largeur de l'écran */
-            max-width: 400px; /* Sécurité pour les grandes tablettes */
-            /* Style Discord */
-            background-color: var(--bg-darker);
-            padding: 8px 15px;
-            border-radius: 25px; /* Look arrondi type pilule */
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            z-index: 1000;
-        }
-            .discord-floating-bar button,
-            .discord-floating-bar .bar-item {
-                flex: 1;
-                display: flex;
-                justify-content: center;
-                font-size: 1.2rem; /* Taille adaptée au tactile */
-                background: none;
-                border: none;
-                color: var(--text-muted);
-            }
-
 }
