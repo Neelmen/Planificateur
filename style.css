@@ -1104,11 +1104,11 @@ input[type=number] {
 #indicateur-mode-dev {
     display: inline-block;
     background-color: rgba(250, 119, 124, 0.15);
-    color: var(--danger-hover);
+    color: var(--danger);
     padding: 4px 8px;
     border-radius: 4px;
     font-weight: 700;
-    font-size: 0.4rem;
+    font-size: 0.8rem;
     letter-spacing: 0.5px;
     border: 1px solid rgba(250, 119, 124, 0.3);
     margin: 0 10px;
