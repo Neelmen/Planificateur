@@ -38,6 +38,7 @@
                     </svg>
                 </button>
                 <span class="nav-title" id="nav-page-title">Menu</span>
+                <span id="indicateur-mode-dev" class="hidden">MODE DEV</span> 
             </div>
             <div class="top-bar-right">
                 <span class="username" id="display-username"></span>
@@ -299,7 +300,7 @@
     
     <script>
         (function () {
-            // Change à 'false' pour désactiver instantanément et revenir au comportement normal
+            // Change à 'false' pour désactiver instantanément et revenir au comportement normal MODEDEV
             const MODE_DEV_SANS_CACHE = true;
 
             const version = MODE_DEV_SANS_CACHE ? Date.now() : '1.0.0';
