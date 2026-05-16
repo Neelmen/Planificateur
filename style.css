@@ -2000,5 +2000,7 @@ input[type=number] {
         gap: 15px;
     }
     /*AUTRES*/
-
+    #planning-grid .planning-row {
+        display: none !important;
+    }
 }
