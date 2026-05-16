@@ -2005,13 +2005,20 @@ input[type=number] {
         flex-direction: column !important;
         gap: 10px !important;
     }
-        .calendar-list .planning-week { /* 2. On cache par défaut TOUTES les semaines du planning */
+        .calendar-list .week-block { /* 2. On cache par défaut TOUTES les semaines du planning */
 
             display: none !important;
         }
 
-            .calendar-list .planning-week:first-of-type { /* 3. On force l'affichage de la PREMIÈRE semaine uniquement */
-                display: block !important; /* Ou 'flex' selon la structure d'alignement de vos lignes */
-            }
+        .calendar-list .week-block:first-of-type { /* 3. On force l'affichage de la PREMIÈRE semaine uniquement */
+            display: block !important; /* Ou 'flex' selon la structure d'alignement de vos lignes */
+        }
+
+
+
+
+
+
+
     /*Autres*/
 }
