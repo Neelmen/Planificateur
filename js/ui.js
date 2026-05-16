@@ -33,9 +33,13 @@ function showView(viewId) {
 
     // 3. ACTIONS SPÉCIFIQUES LORS DU RETOUR AU MENU
     if (viewId === 'menu-view') {
-        // On recharge les plannings récents pour mettre à jour les 3 cases
-        if (typeof window.chargerListePlannings === 'function') {
-            window.chargerListePlannings();
+
+        if (typeof loadRecentPlannings === 'function') {
+            loadRecentPlannings();
+        }
+        // 2. Optionnel : Si la modal liste complète est restée ouverte, on la ferme
+        if (typeof fermerModalListePlannings === 'function') {
+            fermerModalListePlannings();
         }
     }
 
