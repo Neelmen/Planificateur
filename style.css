@@ -2101,7 +2101,9 @@ input[type=number] {
     .info-value {
         font-size: 13px !important; /* Réduction proportionnelle de la taille de la valeur */
     }
-
+    .info-separator {
+        display: none;
+    }
 
 
     /*NOM DU MOIS DU PLANNING*/
