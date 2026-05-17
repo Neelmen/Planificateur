@@ -2077,8 +2077,8 @@ input[type=number] {
     /* TOPBAR D'INFORMATIONS PLANNING */
     .discord-info-bar {
         height: auto !important; /* Supprime la hauteur fixe PC pour s'adapter au contenu */
-        padding: 6px 15px !important;
-        margin-top: 10px !important; /* Ajustement de la marge haute */
+        padding: 6px 6px !important;
+        margin-top: 0px !important; /* Ajustement de la marge haute */
         width: 100% !important;
         box-sizing: border-box !important;
     }
