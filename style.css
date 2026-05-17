@@ -2151,14 +2151,14 @@ input[type=number] {
     .floating-bar-actions-center {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 20px;
         margin-bottom: -5px !important; /* Optionnel : remonte aussi le titre vers le haut */
     }
     /*BOUTONS DE LA TOOLBAR*/
     .action-btn-discord {
         background: var(--blurple);
         border: none;
-        padding: 6px 6px;
+        padding: 10px 10px;
         border-radius: 50px;
         display: flex;
         align-items: center;
