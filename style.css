@@ -2151,7 +2151,6 @@ input[type=number] {
         min-height: 40px;
         background: var(--bg-dark);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        margin-bottom: -5px;
     }
 
     .floating-bar-actions-center {
