@@ -1207,33 +1207,6 @@ input[type=number] {
     z-index: 1;
     pointer-events: none;
 }
-/* BOUTON SUPP GESTION ENTREPRISES*/
-.btn-delete {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(237, 66, 69, 1);
-    border: none;
-    color: #fff;
-    padding: 6px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    line-height: 1;
-    font-size: 2rem;
-    font-weight: bold;
-    width: 24px;
-    height: 24px;
-}
-
-    .btn-delete:hover {
-        background-color: rgba(237, 66, 69, 1);
-        transform: scale(1.5);
-    }
-
-    .btn-delete:active {
-        transform: scale(0.95); /* Effet de pression */
-    }
 
 /* --- BOUTON FLOTTANT POUR GESTION ENTREPRISES --- */
 .companies-float-btn {
@@ -1261,6 +1234,34 @@ input[type=number] {
     box-shadow: 0 12px 40px rgba(88, 101, 242, 0.6);
     background: linear-gradient(135deg, #4752c4, #3c45a0);
 }
+
+/* BOUTON SUPP GESTION ENTREPRISES*/
+.btn-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(237, 66, 69, 1);
+    border: none;
+    color: #fff;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1;
+    font-size: 2rem;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+}
+
+    .btn-delete:hover {
+        background-color: rgba(237, 66, 69, 1);
+        transform: scale(1.5);
+    }
+
+    .btn-delete:active {
+        transform: scale(0.95); /* Effet de pression */
+    }
 
 /* --- TITRE AU HOVER POUR BOUTON GESTION ENTREPRISES --- */
 .companies-float-btn::after {
@@ -2111,5 +2112,11 @@ input[type=number] {
         margin-bottom: 0px !important; /* Réduit l'espace sous le nom du mois */
         margin-top: 0px !important; /* Optionnel : remonte aussi le titre vers le haut */
     }
+
+    /*GESTION ENTREPRISES*/
+    .companies-float-btn{
+        display: none;
+    }
     /*Autres*/
+
 }
