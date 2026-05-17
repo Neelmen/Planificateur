@@ -2146,13 +2146,14 @@ input[type=number] {
         min-height: 40px;
         background: var(--bg-dark);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: -5px;
     }
 
     .floating-bar-actions-center {
         display: flex;
         align-items: center;
         gap: 20px;
-        margin-bottom: -20px !important; /* Optionnel : remonte aussi le titre vers le haut */
+        margin-bottom: 0px !important; /* Optionnel : remonte aussi le titre vers le haut */
     }
     /*BOUTONS DE LA TOOLBAR*/
     .action-btn-discord {
