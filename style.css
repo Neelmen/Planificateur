@@ -2109,8 +2109,8 @@ input[type=number] {
     }
 
     /*GESTION ENTREPRISES*/
-    .companies-float-btn{
-        display: none;
+    .companies-float-btn {
+        display: none !important;
     }
 
     /* --- BARRE FLOTTANTE TOOLBAR --- */
