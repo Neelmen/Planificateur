@@ -2111,7 +2111,7 @@ input[type=number] {
     /*NOM DU MOIS DU PLANNING*/
     .planning-header h2 {
         margin-bottom: 0px !important; /* Réduit l'espace sous le nom du mois */
-        margin-top: 0px !important; /* Optionnel : remonte aussi le titre vers le haut */
+        margin-top: 20px !important; /* Optionnel : remonte aussi le titre vers le haut */
     }
 
     /*GESTION ENTREPRISES*/
