@@ -2110,7 +2110,7 @@ input[type=number] {
 
     /*NOM DU MOIS DU PLANNING*/
     .planning-header-container {
-        padding: 2px;
+        padding: 0px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -2134,14 +2134,13 @@ input[type=number] {
         left: 50%;
         transform: translateX(-50%) translateY(0);
         width: fit-content;
-        /* MODIFICATIONS DES BORDURES ET MARGES */
-        margin-top: 3px; /* Petite marge de 3px requise en haut */
-        border-bottom: 2px solid transparent !important; /* Bordure basse de minimum 2px (invisible par défaut) */
+        margin-top: -10px; /* Petite marge de 3px requise en haut */
+        border-bottom: 0px solid transparent !important; /* Bordure basse de minimum 2px (invisible par défaut) */
         border-top: 2px solid transparent; /* Équilibre le saut de pixel avec le bas */
         border-left: 2px solid transparent;
         border-right: 2px solid transparent;
         border-radius: 50px;
-        padding: 12px 16px;
+        padding: 6px 16px;
         box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.4); /* Ombre inversée vers le haut puisque la barre est en bas */
         z-index: 1000;
         min-height: 40px;
@@ -2149,27 +2148,20 @@ input[type=number] {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-        .discord-floating-bar:hover {
-            /* Maintien de la bordure basse de minimum 2px colorée au survol */
-            border: 2px solid var(--orange) !important;
-            box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(88, 101, 242, 0.2);
-            transform: translateX(-50%) translateY(-2px);
-            cursor: pointer;
-        }
-
     .floating-bar-actions-center {
         display: flex;
         align-items: center;
         gap: 15px;
+        margin-bottom: -5px !important; /* Optionnel : remonte aussi le titre vers le haut */
     }
     /*BOUTONS DE LA TOOLBAR*/
     .action-btn-discord {
         background: var(--blurple);
         border: none;
         color: white;
-        padding: 8px 12px;
+        padding: 2px 2px;
         cursor: pointer;
-        border-radius: 25px;
+        border-radius: 50px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -2177,21 +2169,11 @@ input[type=number] {
         font-weight: 500;
         transition: all 0.2s ease;
     }
-
-        .action-btn-discord:hover {
-            background-color: var(--blurple-hover);
-            color: white;
-        }
         /*BOUTON SUPPRIMER*/
         .action-btn-discord.danger {
             background: var(--danger);
             color: white;
         }
-
-            .action-btn-discord.danger:hover {
-                background-color: var(--danger-hover);
-                color: white;
-            }
         /* Cache le texte sur mobile pour ne garder que les icônes */
         .action-btn-discord .label {
             display: none;
