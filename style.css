@@ -2158,13 +2158,10 @@ input[type=number] {
     .action-btn-discord {
         background: var(--blurple);
         border: none;
-        color: white;
-        padding: 2px 2px;
-        cursor: pointer;
+        padding: 6px 6px;
         border-radius: 50px;
         display: flex;
         align-items: center;
-        gap: 8px;
         font-size: 14px;
         font-weight: 500;
         transition: all 0.2s ease;
