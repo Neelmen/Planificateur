@@ -2109,9 +2109,17 @@ input[type=number] {
 
 
     /*NOM DU MOIS DU PLANNING*/
+    .planning-header-container {
+        padding: 2px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--bg-darker);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
     .planning-header h2 {
         margin-bottom: 0px !important; /* Réduit l'espace sous le nom du mois */
-        margin-top: -50px !important; /* Optionnel : remonte aussi le titre vers le haut */
+        margin-top: -10px !important; /* Optionnel : remonte aussi le titre vers le haut */
     }
 
     /*GESTION ENTREPRISES*/
