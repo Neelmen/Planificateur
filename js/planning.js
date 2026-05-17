@@ -389,6 +389,11 @@ async function loadPlanningData() {
     try {
         if (!PlanningState.currentPlanning?.id) return;
 
+        const btnCompanies = document.getElementById('toolbar-btn-companies');
+        const sepCompanies = document.getElementById('toolbar-separator-companies');
+        if (btnCompanies) btnCompanies.classList.remove('hidden');
+        if (sepCompanies) sepCompanies.classList.remove('hidden');
+
         const { data: shifts, error } = await _supabase
             .from('shifts')
             .select('*')
@@ -1206,7 +1211,13 @@ function closeAllModals() {
 /**
  * Retourne au menu principal avec rechargement complet (équivalent F5)
  */
-window.backToMainMenu = function() {
+window.backToMainMenu = function () {
+
+    const btnCompanies = document.getElementById('toolbar-btn-companies');
+    const sepCompanies = document.getElementById('toolbar-separator-companies');
+    if (btnCompanies) btnCompanies.classList.add('hidden');
+    if (sepCompanies) sepCompanies.classList.add('hidden');
+
     try {
         // Recharger complètement la page (équivalent F5)
         location.reload();
