@@ -38,6 +38,9 @@ body {
 .hidden {
     display: none !important;
 }
+.hidden-pc {
+    display: none !important;
+}
 
 /* 2. AUTHENTIFICATION */
 .auth-container {
@@ -1954,6 +1957,9 @@ input[type=number] {
 
 /* --- VERSION MOBILE : */
 @media (max-width: 768px) {
+    .hidden-pc {
+        display: flex !important;
+    }
     /*SIDEBAR*/
     #companies-sidebar {
         position: fixed !important;
