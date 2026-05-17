@@ -2016,6 +2016,7 @@ input[type=number] {
         overflow-y: auto !important; /* Permet le défilement vertical si besoin */
         align-items: stretch !important;
         box-sizing: border-box !important;
+        margin-bottom: -5px;
     }
 
         /* 1. On cache TOUTES les semaines par défaut sur mobile */
