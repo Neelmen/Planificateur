@@ -8,6 +8,13 @@ const PlanningState = {
     companies: [],
     isLoading: false
 };
+
+const ABSENCE_TYPES = {
+    'repos': { label: 'REPOS', isWorked: false },
+    'vacance': { label: 'VACANCE', isWorked: false },
+    'arret': { label: 'ARRÊT MALADIE', isWorked: false },
+};
+
 let internalClipboard = null; // Cache pour les données du shift
 let hoveredDayNum = null;    // Jour actuellement survolé
 
@@ -166,15 +173,17 @@ function getCellContent(dayData) {
     }
 
     const entId = dayData.shift.entreprise_id;
+    const horaire = dayData.shift.horaire_saisi?.toLowerCase();
 
-    // 3. Vérification si c'est explicitement un repos
-    if (!entId || entId === 'repos') {
-        console.log('getCellContent - entreprise_id absent ou "repos"');
-        return 'REPOS';
+    // 3. Vérification si c'est une absence définie dans notre dictionnaire générique
+    if (!entId) {
+        if (ABSENCE_TYPES[horaire]) {
+            return ABSENCE_TYPES[horaire].label;
+        }
+        return 'REPOS'; // Repli par défaut
     }
 
     // 4. Recherche de l'entreprise dans le state global
-    // On utilise String() pour comparer l'ID Supabase (int) avec l'ID du sélecteur (string)
     const company = state.companies.find(c => String(c.id) === String(entId));
 
     if (company) {
@@ -283,6 +292,16 @@ function createWeekBlock(weekNumber, weekDays) {
     return weekBlock;
 }
 function createCompactDayRow(dayData) {
+    const entId = dayData.shift?.entreprise_id;
+    const horaire = dayData.shift?.horaire_saisi?.toLowerCase();
+
+    // Est-ce une vraie entreprise ou une absence ?
+    const isCompany = !!entId;
+    const isAbsence = !entId && ABSENCE_TYPES[horaire];
+
+    // Détermination si le jour est considéré comme travaillé ou non
+    const isWorked = isCompany || (isAbsence && ABSENCE_TYPES[horaire].isWorked);
+
     const dayRow = document.createElement('div');
     dayRow.className = 'day-row grid-layout';
     dayRow.setAttribute('data-day', dayData.day);
@@ -306,16 +325,15 @@ function createCompactDayRow(dayData) {
 
     // --- LOGIQUE DE FILTRAGE STRICTE ---
     const isNight = dayData.shift?.is_night || false;
-    const isCompany = dayData.shift?.entreprise_id && dayData.shift.entreprise_id !== 'repos';
 
-    // On n'extrait les données que si c'est une entreprise, sinon on force le vide[cite: 1]
+    // Extraction des données basée sur le type d'activité (Entreprise vs Absence)
     const displayContent = getCellContent(dayData);
     const displayHours = isCompany ? getCellHours(dayData) : '';
     const displaySite = isCompany ? (dayData.shift?.site || '') : '';
     const kmValue = dayData.shift?.km;
     const displayKm = (isCompany && kmValue > 0) ? `${kmValue} km` : '';
 
-    // Détermination des classes (uniquement si entreprise)[cite: 1]
+    // Détermination des classes graphiques
     const nightClass = (isNight && isCompany) ? 'night-mode' : (isCompany ? 'day-mode' : '');
     const backgroundClass = (isCompany && isNight) ? 'night-background' : (isCompany ? 'day-background' : '');
 
@@ -329,8 +347,17 @@ function createCompactDayRow(dayData) {
         <div class="grid-cell cell-7-8 ${nightClass}">${displaySite}</div>
     `;
 
-    // Reset et application des styles propres[cite: 1, 3]
+    // Reset et application des styles propres
     dayRow.style.borderLeft = '4px solid transparent';
+
+    // Application de la couleur de l'entreprise si existante
+    if (isCompany) {
+        const company = state.companies.find(c => String(c.id) === String(entId));
+        if (company?.couleur_hex) {
+            dayRow.style.borderLeft = `4px solid ${company.couleur_hex}`;
+        }
+    }
+
     if (backgroundClass) {
         dayRow.classList.add(backgroundClass);
     }
@@ -436,10 +463,14 @@ function updateDayDisplayNew(dayData) {
     const dayRow = document.querySelector(`[data-day="${dayData.day}"]`);
     if (!dayRow) return;
 
+    const entId = dayData.shift?.entreprise_id;
+    const horaire = dayData.shift?.horaire_saisi?.toLowerCase();
+
     // 1. Logique métier
-    const isCompany = dayData.shift?.entreprise_id && dayData.shift.entreprise_id !== 'repos';
+    const isCompany = !!entId;
+    const isAbsence = !entId && ABSENCE_TYPES[horaire];
     const isNight = dayData.shift?.is_night || false;
-    const company = isCompany ? state.companies.find(c => String(c.id) === String(dayData.shift?.entreprise_id)) : null;
+    const company = isCompany ? state.companies.find(c => String(c.id) === String(entId)) : null;
 
     // 2. Préparation des données
     const dayNames = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
@@ -486,39 +517,65 @@ function updateDayDisplayNew(dayData) {
 /**
  * Ouvre le menu EditRow pour modifier un jour
  */
-function openEditRow(dayNumber) {
-    const dayData = PlanningState.days.find(d => d.day === dayNumber);
-    if (!dayData) return;
-
-    // Préparer le menu
+window.openEditRow = function (dayNumber) {
     const menu = document.getElementById('editrow-menu');
-    if (!menu) {
-        console.error('Menu EditRow non trouvé');
-        return;
+    if (!menu) return;
+
+    menu.setAttribute('data-current-day', dayNumber);
+    
+    // Titre de la modal (ex: Modification du 05)
+    const titleEl = menu.querySelector('.discord-modal-header h3');
+    if (titleEl) {
+        titleEl.textContent = `Modification du ${String(dayNumber).padStart(2, '0')}`;
     }
 
-    // Titre formaté
-    const monthName = MONTHS[PlanningState.currentMonth - 1];
-    const title = dayNumber === 1 ? `1er ${monthName}` : `${dayNumber} ${monthName}`;
-    document.getElementById('editrow-title').innerText = title;
+    // Récupération des éléments du formulaire
+    const companySelect = document.getElementById('editrow-company');
+    const hoursInput = document.getElementById('editrow-hours');
+    const siteSelect = document.getElementById('editrow-site');
+    const kmInput = document.getElementById('editrow-km');
+    const nightSwitch = document.getElementById('editrow-is-night');
 
-    // Stocker le jour en cours
-    menu.setAttribute('data-current-day', dayNumber);
+    // Génération dynamique des options du sélecteur d'activité
+    if (companySelect) {
+        let optionsHtml = '';
+        
+        // 1. Injection des activités hors-entreprise depuis le dictionnaire
+        for (const [key, config] of Object.entries(ABSENCE_TYPES)) {
+            optionsHtml += `<option value="${key}">${config.label}</option>`;
+        }
+        
+        // 2. Injection des vraies entreprises
+        if (state.companies && state.companies.length > 0) {
+            state.companies.forEach(c => {
+                optionsHtml += `<option value="${c.id}">${c.nom}</option>`;
+            });
+        }
 
-    // Remplir les sélecteurs
-    populateEditRowSelectors();
+        companySelect.innerHTML = optionsHtml;
+    }
 
-    // Pré-remplir avec les données existantes
-    if (dayData.shift) {
+    // Recherche d'un shift existant pour ce jour
+    const dayData = PlanningState.days.find(d => d.day === dayNumber);
+    
+    if (dayData && dayData.shift) {
+        // Si des données existent, on pré-remplit le formulaire avec
         fillEditRowWithData(dayData.shift);
     } else {
-        resetEditRow();
+        // S'il n'y a AUCUNE donnée en base pour ce jour (Nouveau jour) :
+        if (companySelect) companySelect.value = 'repos'; // Sélectionne REPOS par défaut
+        if (hoursInput) hoursInput.value = '';
+        if (siteSelect) siteSelect.value = '';
+        if (kmInput) kmInput.value = '';
+        if (nightSwitch) nightSwitch.checked = false;
+        
+        updateEditRowSwitchText();
     }
 
-    // Afficher le menu
+    // Affichage de la modal et masquage du menu contextuel clic droit
     menu.classList.remove('hidden');
-}
-
+    document.getElementById('custom-context-menu')?.classList.add('hidden');
+};
 /**
  * Remplit les sélecteurs du menu EditRow
  */
@@ -563,25 +620,19 @@ async function populateEditRowSelectors() {
     const companySelect = document.getElementById('editrow-company');
 
     if (companySelect) {
-        companySelect.innerHTML = `
-        <option value="Repos" selected>Repos</option>
-        <option value="Vacance">Vacance</option>
-    `;
-    
-        // UTILISATION DE state.companies (chargé au démarrage dans app.js)
-        const companies = state.companies || [];
+        let optionsHtml = '';
 
-        if (companies.length > 0) {
-            companies.forEach(company => {
-                const option = document.createElement('option');
-                option.value = company.id;
-                option.textContent = company.nom;
-                companySelect.appendChild(option);
-            });
-            console.log(`${companies.length} entreprises ajoutées au sélecteur.`);
-        } else {
-            console.warn('Aucune entreprise disponible dans state.companies');
+        // 1. On injecte les absences en premier
+        for (const [key, config] of Object.entries(ABSENCE_TYPES)) {
+            optionsHtml += `<option value="${key}">${config.label}</option>`;
         }
+
+        // 2. On ajoute les vraies entreprises
+        state.companies.forEach(c => {
+            optionsHtml += `<option value="${c.id}">${c.nom}</option>`;
+        });
+
+        companySelect.innerHTML = optionsHtml;
     }
 
     // 2. Champ de site avec suggestions dynamiques (datalist)
@@ -618,16 +669,21 @@ function fillEditRowWithData(shift) {
     const kmInput = document.getElementById('editrow-km');
     const nightSwitch = document.getElementById('editrow-is-night');
 
-    // Correction : vérifier si entreprise_id existe et n'est pas 'repos'
+    // Détermination de l'option à sélectionner dans la liste
     if (companySelect) {
-        if (shift.entreprise_id && shift.entreprise_id !== 'repos') {
-            companySelect.value = shift.entreprise_id;
+        const entId = shift.entreprise_id;
+        const horaire = shift.horaire_saisi?.toLowerCase();
+
+        if (entId) {
+            companySelect.value = entId; // C'est une entreprise (UUID)
+        } else if (ABSENCE_TYPES[horaire]) {
+            companySelect.value = horaire; // C'est une absence identifiée ('vacance', 'arret'...)
         } else {
-            companySelect.value = 'repos';
+            companySelect.value = 'repos'; // Fallback par défaut sur repos
         }
     }
-    
-    if (hoursInput) hoursInput.value = shift.horaire_saisi || '';
+
+    if (hoursInput) hoursInput.value = shift.entreprise_id ? (shift.horaire_saisi || '') : '';
     if (siteSelect) siteSelect.value = shift.site || '';
     if (kmInput) kmInput.value = shift.km || '';
     if (nightSwitch) nightSwitch.checked = shift.is_night || false;
@@ -681,50 +737,72 @@ window.saveEditRow = async function () {
     try {
         const menu = document.getElementById('editrow-menu');
         const dayNumber = parseInt(menu?.getAttribute('data-current-day'));
-
         if (!dayNumber || !PlanningState.currentPlanning?.id) return;
 
         const companyId = document.getElementById('editrow-company')?.value;
+        const isAbsence = ABSENCE_TYPES.hasOwnProperty(companyId);
+
         const hours = document.getElementById('editrow-hours')?.value;
         const site = document.getElementById('editrow-site')?.value;
         const km = document.getElementById('editrow-km')?.value || '0';
         const isNight = document.getElementById('editrow-is-night')?.checked;
 
         const dateISO = `${PlanningState.currentYear}-${String(PlanningState.currentMonth).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-
-        const shiftData = {
-            planning_id: PlanningState.currentPlanning.id,
-            entreprise_id: (companyId === 'repos' || !companyId) ? null : companyId,
-            date_jour: dateISO,
-            horaire_saisi: hours,
-            site: site,
-            km: parseFloat(km) || 0,
-            is_night: !!isNight,
-            user_id: state.user.id,
-            is_ferie: false
-        };
-
         const dayData = PlanningState.days.find(d => d.day === dayNumber);
-        if (dayData?.shift?.id) {
-            shiftData.id = dayData.shift.id;
+
+        // --- OPTIMISATION : NETTOYAGE DU REPOS (VALEUR PAR DÉFAUT) ---
+        if (companyId === 'repos') {
+            if (dayData?.shift?.id) {
+                // Si le shift existait en base, on le supprime pour libérer de l'espace
+                const { error: deleteError } = await _supabase
+                    .from('shifts')
+                    .delete()
+                    .eq('id', dayData.shift.id);
+
+                if (deleteError) throw deleteError;
+            }
+
+            // On nettoie l'état local
+            if (dayData) {
+                dayData.shift = null;
+                updateDayDisplayNew(dayData);
+            }
+        }
+        // --- CAS GÉNÉRAL : ENTREPRISES OU AUTRES ABSENCES (VACANCE, ARRET...) ---
+        else {
+            const shiftData = {
+                planning_id: PlanningState.currentPlanning.id,
+                entreprise_id: isAbsence ? null : companyId,
+                date_jour: dateISO,
+                horaire_saisi: isAbsence ? companyId.toUpperCase() : hours,
+                site: isAbsence ? '' : site,
+                km: isAbsence ? 0 : (parseFloat(km) || 0),
+                is_night: isAbsence ? false : !!isNight,
+                user_id: state.user.id,
+                is_ferie: false
+            };
+
+            if (dayData?.shift?.id) {
+                shiftData.id = dayData.shift.id;
+            }
+
+            const { data, error } = await _supabase
+                .from('shifts')
+                .upsert(shiftData, { onConflict: 'planning_id, date_jour' })
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            if (dayData) {
+                dayData.shift = data;
+                updateDayDisplayNew(dayData);
+            }
         }
 
-        const { data, error } = await _supabase
-            .from('shifts')
-            .upsert(shiftData, { onConflict: 'planning_id, date_jour' })
-            .select()
-            .single();
-
-        if (error) throw error;
-
-        if (dayData) {
-            dayData.shift = data;
-            updateDayDisplayNew(dayData);
-        }
-
+        // Synchronisation globale de l'UI
         updatePlanningStats();
         closeEditRow();
-
     } catch (error) {
         console.error('saveEditRow - Erreur:', error);
         alert('Erreur lors de la sauvegarde : ' + (error.message || 'Erreur inconnue'));
@@ -754,13 +832,13 @@ window.saveDayModal = async function() {
  */
 function updatePlanningStats() {
     console.log("Mise à jour des statistiques du planning...");
-
     try {
         // --- 1. INITIALISATION DES COMPTEURS ---
         let totalHours = 0;
         let totalKm = 0;
         let totalGrossSalary = 0;
         let workedDays = 0;
+        let totalAbsenceDays = 0;
         let uniqueCompanies = new Set();
 
         // --- 2. CALCULS VIA LES DONNÉES DU PLANNING ---
@@ -770,38 +848,50 @@ function updatePlanningStats() {
 
         PlanningState.days.forEach(day => {
             const shift = day.shift;
+            if (shift) {
+                const entId = shift.entreprise_id;
+                const horaire = shift.horaire_saisi?.toLowerCase();
 
-            // On ne calcule que si c'est une entreprise et pas un repos
-            if (shift && shift.entreprise_id && shift.entreprise_id !== 'repos') {
+                // Détermination dynamique : travaillé vs absence
+                const isCompany = !!entId;
+                const isAbsenceConfigured = !entId && ABSENCE_TYPES[horaire];
+                const isWorked = isCompany || (isAbsenceConfigured && ABSENCE_TYPES[horaire].isWorked);
 
-                // Calcul du temps de travail
-                const hours = parseHoursText(shift.horaire_saisi || "0");
-                totalHours += hours;
+                if (isWorked) {
+                    workedDays++;
 
-                // Identification de l'entreprise pour le salaire
-                const company = state.companies.find(c => String(c.id) === String(shift.entreprise_id));
-                if (company) {
-                    uniqueCompanies.add(company.id);
-                    if (company.taux_horaire_brut) {
-                        totalGrossSalary += (hours * company.taux_horaire_brut);
+                    // Calcul du temps de travail (uniquement s'il y a un ID entreprise ou que l'absence est notée payée)
+                    const hours = parseHoursText(shift.horaire_saisi || "0");
+                    totalHours += hours;
+
+                    // Identification de l'entreprise pour le calcul salaire
+                    if (isCompany) {
+                        const company = state.companies.find(c => String(c.id) === String(entId));
+                        if (company) {
+                            uniqueCompanies.add(company.id);
+                            if (company.taux_horaire_brut) {
+                                totalGrossSalary += (hours * company.taux_horaire_brut);
+                            }
+                        }
                     }
+
+                    // Kilométrage
+                    totalKm += parseFloat(shift.km || 0);
+                } else if (isAbsenceConfigured && horaire !== 'repos') {
+                    // On compte l'ensemble des absences hors-repos (Vacances, Arrêts, Formations non payées)
+                    totalAbsenceDays++;
                 }
-
-                // Kilométrage
-                totalKm += parseFloat(shift.km || 0);
-
-                // Incrément des jours travaillés
-                workedDays++;
             }
         });
 
         // --- 3. LOGIQUE FINANCIÈRE ET TEMPS ---
         const totalNetSalary = totalGrossSalary * 0.77; // Ratio Brut -> Net
         const totalDaysInMonth = PlanningState.days.length;
-        const restDays = totalDaysInMonth - workedDays;
+
+        // Les vrais jours de repos excluent désormais les jours travaillés ET toutes les absences actives
+        const restDays = totalDaysInMonth - workedDays - totalAbsenceDays;
 
         // --- 4. MISE À JOUR DU DOM (AFFICHAGE) ---
-
         // HEURES (Formatage h/min)
         const hoursEl = document.getElementById('stat-hours');
         if (hoursEl) {
@@ -828,7 +918,7 @@ function updatePlanningStats() {
             daysEl.textContent = `${workedDays}/${totalDaysInMonth}`;
         }
 
-        // JOURS DE REPOS (Nouvel élément)
+        // JOURS DE REPOS SEULS
         const restEl = document.getElementById('stat-rest-days');
         if (restEl) {
             restEl.textContent = `${restDays}/${totalDaysInMonth}`;
@@ -840,8 +930,7 @@ function updatePlanningStats() {
             companiesEl.textContent = uniqueCompanies.size;
         }
 
-        console.log(`Stats calculées : ${workedDays}j travaillés, ${restDays}j repos, ${totalHours}h totales.`);
-
+        console.log(`Stats calculées : ${workedDays}j travaillés, ${totalAbsenceDays}j absences, ${restDays}j repos purs.`);
     } catch (error) {
         console.error('Erreur critique dans updatePlanningStats:', error);
     }
@@ -1648,19 +1737,23 @@ function showDiscordToast(message, targetSelector) {
 let copiedRowData = null; // Notre "presse-papier" interne
 let focusedRowId = null;  // Pour savoir quelle ligne est survolée/cliquée
 
-// 1. Gérer le clic droit sur les lignes
+// Gérer le clic droit sur les lignes
 document.addEventListener('contextmenu', (e) => {
     const row = e.target.closest('.day-row');
-    if (row) {
-        e.preventDefault();
-        focusedRowId = row.dataset.id; // On stocke l'ID de la ligne
+    const menu = document.getElementById('custom-context-menu');
 
-        const menu = document.getElementById('custom-context-menu');
-        menu.style.top = `${e.clientY}px`;
-        menu.style.left = `${e.clientX}px`;
+    if (row && menu) {
+        e.preventDefault();
+
+        // Fixation du jour ciblé
+        hoveredDayNum = parseInt(row.getAttribute('data-day'));
+
+        // Positionnement absolu par rapport à la page globale
+        menu.style.top = `${e.pageY}px`;
+        menu.style.left = `${e.pageX}px`;
         menu.classList.remove('hidden');
     } else {
-        document.getElementById('custom-context-menu').classList.add('hidden');
+        menu?.classList.add('hidden');
     }
 });
 
@@ -1685,151 +1778,112 @@ document.addEventListener('keydown', (e) => {
 });
 
 // --- FONCTIONS LOGIQUES ---
-function copyRowData(rowId) {
-    // On cherche les données dans ton PlanningState.days
-    const dayData = PlanningState.days.find(d => d.id == rowId);
-    if (dayData) {
-        copiedRowData = { ...dayData }; // Copie superficielle
-        delete copiedRowData.id;       // On ne copie pas l'ID unique
-        delete copiedRowData.date;     // On ne copie pas la date
-        console.log("Données copiées :", copiedRowData);
+/**
+ * Copie les données brutes du shift spécifié
+ */
+window.copyRowData = function (shift) {
+    if (!shift) {
+        internalClipboard = null;
+        console.log("Ligne vide (REPOS) copiée dans le presse-papier.");
+        return;
     }
-}
+    // Deep copy pour éviter les conflits de référence
+    internalClipboard = { ...shift };
+    console.log("Shift copié dans le presse-papier :", internalClipboard);
+};
 
-async function pasteRowData(rowId) {
-    if (!copiedRowData) return;
+/**
+ * Déclenche le collage sur la ligne survolée actuelle via raccourci
+ */
+window.pasteRowData = async function () {
+    if (hoveredDayNum === null) return;
+    await window.pasteToDay(hoveredDayNum);
+};
 
-    // On met à jour l'objet dans ton état local
-    const dayIndex = PlanningState.days.findIndex(d => d.id == rowId);
-    if (dayIndex !== -1) {
-        // On fusionne les données copiées sur la ligne actuelle
-        PlanningState.days[dayIndex] = {
-            ...PlanningState.days[dayIndex],
-            ...copiedRowData
-        };
-
-        // Appeler ta fonction de rendu pour mettre à jour l'affichage
-        renderPlanning();
-
-        // Optionnel : Sauvegarder automatiquement sur Supabase
-        // await saveDayToSupabase(PlanningState.days[dayIndex]);
-    }
-}
-/** * LOGIQUE DE GESTION DU CLAVIER ET CLIC DROIT
+/**
+ * Écouteur d'événements global pour les raccourcis clavier Ctrl+C / Ctrl+V
  */
 document.addEventListener('keydown', async (e) => {
-    // Si la souris n'est pas sur une ligne, on ignore
-    if (!hoveredDayNum) return;
+    // On s'assure qu'une ligne est survolée et qu'on n'est pas en train d'écrire dans un champ d'entrée (input/textarea)
+    if (hoveredDayNum === null) return;
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
 
-    // --- CTRL + C (COPIER) ---
-    if (e.ctrlKey && e.key === 'c') {
+    // CTRL + C ou CMD + C (Mac)
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
         e.preventDefault();
         const dayData = PlanningState.days.find(d => d.day === hoveredDayNum);
-
-        if (dayData && dayData.shift) {
-            // CRUCIAL : On crée un NOUVEL objet sans l'ID d'origine
-            // pour ne pas perturber les futures sauvegardes (UPSERT)
-            internalClipboard = {
-                entreprise_id: dayData.shift.entreprise_id,
-                horaire_saisi: dayData.shift.horaire_saisi,
-                site: dayData.shift.site,
-                km: dayData.shift.km,
-                is_night: dayData.shift.is_night
-            };
-
-            console.log(`📋 Copie réussie (Jour ${hoveredDayNum}) :`, internalClipboard);
-
-            // Optionnel : un petit effet visuel pour confirmer la copie
-            const row = document.querySelector(`[data-day="${hoveredDayNum}"]`);
-            row.style.opacity = "0.5";
-            setTimeout(() => row.style.opacity = "1", 200);
-        }
+        window.copyRowData(dayData?.shift);
     }
 
-    // --- CTRL + V (COLLER) ---
-    if (e.ctrlKey && e.key === 'v') {
+    // CTRL + V ou CMD + V (Mac)
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
         e.preventDefault();
-        if (!internalClipboard) return;
-
-        console.log(`📥 Collage sur Jour ${hoveredDayNum}...`);
-        await pasteToDay(hoveredDayNum);
-    }
-
-    // --- DELETE / BACKSPACE (EFFACER) ---
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-        const dayData = PlanningState.days.find(d => d.day === hoveredDayNum);
-        if (dayData && dayData.shift) {
-            if (confirm(`Effacer le contenu du jour ${hoveredDayNum} ?`)) {
-                await clearDay(hoveredDayNum);
-            }
-        }
+        await window.pasteRowData();
     }
 });
 
 /**
- * Fonction pour coller les données et synchroniser avec Supabase
+ * Exécute la logique de collage et de synchronisation base de données pour un jour précis
  */
-async function pasteToDay(dayNumber) {
-    const dayData = PlanningState.days.find(d => d.day === dayNumber);
-    if (!dayData || !PlanningState.currentPlanning) return;
-
-    const dateISO = `${PlanningState.currentYear}-${String(PlanningState.currentMonth).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-
-    // On prépare l'objet pour l'UPSERT (mise à jour ou création)
-    const shiftToSave = {
-        ...internalClipboard,
-        planning_id: PlanningState.currentPlanning.id,
-        user_id: state.user.id,
-        date_jour: dateISO,
-        is_ferie: false
-    };
-
-    // Si la cible a déjà un ID, on le garde pour écraser la ligne existante
-    if (dayData.shift && dayData.shift.id) {
-        shiftToSave.id = dayData.shift.id;
-    }
-
+window.pasteToDay = async function (dayNumber) {
     try {
-        const { data, error } = await _supabase
-            .from('shifts')
-            .upsert(shiftToSave)
-            .select()
-            .single();
+        const dateISO = `${PlanningState.currentYear}-${String(PlanningState.currentMonth).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+        const dayData = PlanningState.days.find(d => d.day === dayNumber);
+        if (!dayData) return;
 
-        if (error) throw error;
+        // --- CAS 1 : PRESSE-PAPIER VIDE (ON COLLE UN REPOS -> NETTOYAGE BASE) ---
+        if (!internalClipboard) {
+            if (dayData.shift?.id) {
+                const { error: deleteError } = await _supabase
+                    .from('shifts')
+                    .delete()
+                    .eq('id', dayData.shift.id);
 
-        // Mise à jour locale et visuelle
-        dayData.shift = data;
+                if (deleteError) throw deleteError;
+            }
+            dayData.shift = null;
+        }
+        // --- CAS 2 : PRESSE-PAPIER REMPLI (ENTREPRISE OU ABSENCE) ---
+        else {
+            const shiftData = {
+                planning_id: PlanningState.currentPlanning.id,
+                entreprise_id: internalClipboard.entreprise_id,
+                date_jour: dateISO,
+                horaire_saisi: internalClipboard.horaire_saisi,
+                site: internalClipboard.site,
+                km: parseFloat(internalClipboard.km) || 0,
+                is_night: !!internalClipboard.is_night,
+                user_id: state.user.id,
+                is_ferie: !!internalClipboard.is_ferie
+            };
+
+            // Conservation de l'ID existant pour update au lieu d'insérer un doublon
+            if (dayData.shift?.id) {
+                shiftData.id = dayData.shift.id;
+            }
+
+            const { data, error } = await _supabase
+                .from('shifts')
+                .upsert(shiftData, { onConflict: 'planning_id, date_jour' })
+                .select()
+                .single();
+
+            if (error) throw error;
+            dayData.shift = data;
+        }
+
+        // Rafraîchissement graphique et recalcul des compteurs
         updateDayDisplayNew(dayData);
         updatePlanningStats();
+        console.log(`Données collées avec succès sur le jour ${dayNumber}`);
 
-    } catch (err) {
-        console.error("Erreur collage:", err);
+    } catch (error) {
+        console.error(`Erreur lors du pasteToDay sur le jour ${dayNumber}:`, error);
+        alert('Erreur lors du coller : ' + (error.message || 'Erreur inconnue'));
     }
-}
+};
 
-/**
- * Fonction pour effacer un jour
- */
-async function clearDay(dayNumber) {
-    const dayData = PlanningState.days.find(d => d.day === dayNumber);
-    if (!dayData || !dayData.shift?.id) return;
 
-    try {
-        const { error } = await _supabase
-            .from('shifts')
-            .delete()
-            .eq('id', dayData.shift.id);
-
-        if (error) throw error;
-
-        dayData.shift = null;
-        updateDayDisplayNew(dayData);
-        updatePlanningStats();
-    } catch (err) {
-        console.error("Erreur effacement:", err);
-    }
-}
 
 // Bloquer le clic droit navigateur sur le planning pour préparer ton futur menu
 document.getElementById('calendar-container').addEventListener('contextmenu', (e) => {
@@ -1838,9 +1892,7 @@ document.getElementById('calendar-container').addEventListener('contextmenu', (e
         // C'est ici qu'on affichera ta div "liste de boutons" plus tard
     }
 });
-/**
- * Charge tous les plannings de l'utilisateur connecté depuis Supabase
- */
+
 
 /**
  * Ouvre et initialise l'éditeur avec un planning sélectionné
@@ -1992,3 +2044,6 @@ window.demanderSuppressionPlanning = async function (idPlanning, libelle) {
         }
     }
 };
+
+
+
