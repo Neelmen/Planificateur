@@ -2,9 +2,8 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    # S'exécute automatiquement tous les 5 jours à minuit
     - cron: '0 0 */5 * *'
-  workflow_dispatch: # Permet de déclencher le script manuellement depuis l'interface GitHub
+  workflow_dispatch: # Cette ligne est TRÈS importante pour tester
 
 jobs:
   ping_supabase:
@@ -16,3 +15,6 @@ jobs:
           -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
           -I
+
+      - name: Vérification du fonctionnement
+        run: echo "Le ping Supabase a été envoyé avec succès !"
